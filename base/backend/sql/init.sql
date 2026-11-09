@@ -12,5 +12,5 @@ USE app_db;
 INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES
 ('Quản trị viên', 'admin@busgo.vn',    '0900000001', '$2b$12$3KuY4COIiolL.0jsSo9yF.q/66bXHYszUIv7b9HDGW9JfJBSIvfM2', 'admin',    'active'),
 ('Nhân viên',     'staff@busgo.vn',    '0900000002', '$2b$12$cakQnf2ibmHfj6BO487zyOoxFet4TsTn0cNlRTPD9QbWQCetn0Ou6', 'staff',    'active'),
-('Khách hàng',    'customer@busgo.vn', '0900000003', '$2b$12$vvCw.Sh23uN6drxB9jxYQOoyy5F7FtY85NetOmGNqRJsmgulXGmdW', 'customer', 'active');
+('Khách hàng',    'customer@busgo.vn', '0900000003', '$2b$12$vvCw.Sh23uN6drxB9jxYQOoyy5F7FtY85NetOmGNqRJsmgulXGmdW', 'user', 'active');
 
