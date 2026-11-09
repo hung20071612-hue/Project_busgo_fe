@@ -7,17 +7,30 @@ from decimal import Decimal
 
 from sqlalchemy import DateTime, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
+import enum
 
 from app.db.session import Base
 
+class UserRole(enum.Enum):
+    ADMIN = "admin"
+    USER = "user"
+    GUEST = "guest"
 
-class Item(Base):
-    __tablename__ = "items"
+class UserStatus(enum.Enum):
+    ACTIVE = "active"
+    LOCKED = "locked"
+
+
+class User(Base):
+    __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(255))
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    price: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
+    full_name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(255))
+    phone: Mapped[str] = mapped_column(String(10))
+    password_hash: Mapped[str] = mapped_column(String(60))
+    role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
+    status: Mapped[UserStatus] = mapped_column(default=UserStatus.ACTIVE)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()

@@ -5,7 +5,7 @@ FastAPI dùng schema để tự kiểm tra dữ liệu: sai kiểu / thiếu tr�
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 
 class ItemBase(BaseModel):
