@@ -14,7 +14,7 @@ from app.db.session import Base
 class UserRole(enum.Enum):
     ADMIN = "admin"
     USER = "user"
-    GUEST = "guest"
+    STAFF = "staff"
 
 class UserStatus(enum.Enum):
     ACTIVE = "active"
