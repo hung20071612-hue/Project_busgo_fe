@@ -31,7 +31,7 @@ frontend/
 
 **Bước 1: chạy backend trước.** Làm theo `backend/README.md` cho đến khi mở http://127.0.0.1:8000/api/health thấy `"database":"connected"`.
 
-**Bước 2: mở frontend bằng Live Server.** Trong VS Code, cài extension *Live Server* (Ritwick Dey), chuột phải `frontend/index.html` → **Open with Live Server**. Trang mở ở `http://127.0.0.1:5500/index.html` và tự tải lại khi bạn lưu file.
+**Bước 2: mở frontend bằng Live Server.** Trong VS Code, cài extension *Live Server* (Ritwick Dey), chuột phải `frontend/index.html` → **Open with Live Server**. Trang thường mở ở `http://127.0.0.1:5500/index.html` hoặc `http://localhost:5500/index.html`. Frontend tự dùng hostname đang mở để gọi backend ở cổng `8000`, nên cả hai địa chỉ đều dùng được.
 
 Trang chủ hiện **✅ Backend OK · MySQL: connected** là FE đã nối được BE. Bấm menu **Items (CRUD mẫu)** để thử thêm / sửa / xoá, rồi mở MySQL Workbench xem bảng `items` thay đổi theo.
 
@@ -48,7 +48,7 @@ Trình duyệt (FE: 127.0.0.1:5500) --axios--> Backend FastAPI (127.0.0.1:8000/a
   ```js
   API_BASE_URL: "http://127.0.0.1:8000/api",
   ```
-  Backend đổi cổng, hoặc deploy lên server, thì chỉ sửa dòng này.
+  Mặc định hostname được lấy từ URL frontend. Khi cần gọi backend ở máy chủ khác, thêm `?api=https://api.example.com/api` vào URL frontend hoặc sửa cấu hình này.
 - Mọi lời gọi API đều qua `js/api.js`. File này tạo sẵn 1 axios instance (`http`) có `baseURL`, và bọc thành các hàm trả về thẳng `response.data`:
   ```js
   try {
@@ -63,7 +63,7 @@ Trình duyệt (FE: 127.0.0.1:5500) --axios--> Backend FastAPI (127.0.0.1:8000/a
   }
   ```
 - Cần gửi token đăng nhập kèm mọi request? Trong `js/api.js` đã có sẵn đoạn interceptor mẫu (đang comment), chỉ cần bỏ comment.
-- Backend phải cho phép FE gọi (**CORS**). Base code backend đã bật sẵn (`CORS_ORIGINS=*` trong `backend/.env`).
+- Backend phải cho phép FE gọi (**CORS**). File `backend/.env.example` cho phép các origin localhost phổ biến; nếu Live Server dùng cổng khác, thêm origin đầy đủ (gồm giao thức và cổng) vào `CORS_ORIGINS`, phân cách bằng dấu phẩy, rồi khởi động lại backend.
 
 ## 4. Thêm trang mới (vd: trang Sản phẩm)
 

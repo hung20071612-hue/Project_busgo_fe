@@ -130,7 +130,7 @@ Khi lỗi, API trả về JSON dạng `{"detail": "..."}`. Ví dụ: 404 khi kh�
 
 - Frontend gọi tới `http://127.0.0.1:8000/api/...` (cấu hình ở `frontend/js/config.js`).
 - Trình duyệt chặn web ở địa chỉ khác gọi API nếu backend không cho phép. Đó là **CORS**. Backend đã cho phép bằng `CORS_ORIGINS` trong `.env`:
-  - `CORS_ORIGINS=*` cho phép mọi nơi (mặc định, tiện khi học)
+- `CORS_ORIGINS=http://127.0.0.1:5500,http://localhost:5500` cho phép Live Server mặc định (đã đặt trong `.env.example`)
   - Khi deploy thật, ghi rõ domain: `CORS_ORIGINS=https://nhom1.example.com`
 - Sửa `.env` xong phải **tắt (`Ctrl + C`) và chạy lại** uvicorn.
 
@@ -163,3 +163,9 @@ Khi lỗi, API trả về JSON dạng `{"detail": "..."}`. Ví dụ: 404 khi kh�
 ## 11. (Không bắt buộc) Chạy MySQL bằng Docker
 
 Chỉ dành cho bạn nào đã biết Docker và không muốn cài MySQL. Trong `backend/` chạy `docker compose up -d`: MySQL chạy ở cổng **3307**, tự tạo bảng từ `sql/init.sql`. Khi đó sửa `.env` thành `DB_PORT=3307`, `DB_USER=app_user`, `DB_PASSWORD=app_password`.
+
+## 12. Mô hình chuyến xe và tìm chuyến
+
+Chạy thêm `sql/trips.sql` trong MySQL Workbench sau `sql/init.sql`. Script tạo các bảng `routes` (điểm đi/đến), `buses` (biển số/số ghế), `drivers`, `trips` (tuyến, xe, tài xế, giờ đi/đến, giá và trạng thái) và `bookings` (số ghế đã đặt). Khóa ngoại giữ liên kết giữa chuyến và các bảng liên quan; index hỗ trợ lọc chuyến theo tuyến/ngày và tổng hợp booking.
+
+Cuối script có câu JOIN mẫu, đặt `@origin`, `@destination` và `@travel_date` rồi chạy để tìm chuyến `SCHEDULED` trong ngày. `available_seats` bằng tổng số ghế của xe trừ tổng booking `CONFIRMED`; booking `CANCELLED` không bị tính. Chuyến hết ghế được lọc khỏi kết quả. Khi gọi từ ứng dụng, thay biến MySQL mẫu bằng bind parameters do driver hỗ trợ.
