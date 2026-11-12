@@ -1,5 +1,4 @@
-"""Models: Dat ve, giu ghe va thanh toan. Bang: bookings, booking_details, payments.
-"""
+"""Models: Dat ve, giu ghe va thanh toan. Bang: bookings, booking_details, payments."""
 import enum
 from datetime import datetime
 from decimal import Decimal
