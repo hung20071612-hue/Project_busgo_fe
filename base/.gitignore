@@ -1,9 +1,13 @@
-# Môi trường ảo Python
-venv
-
-# Cache Python
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
+env/
 
-# File cấu hình nhạy cảm chứa mật khẩu
+# Cấu hình bí mật
 .env
+
+# IDE
+.vscode/
+.idea/

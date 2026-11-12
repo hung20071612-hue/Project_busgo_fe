@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import item as item_crud
 from app.db.session import get_db
-from app.schemas.item import ItemCreate, ItemOut, ItemUpdate
+from app.schemas.auth_schema import ItemCreate, ItemOut, ItemUpdate
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
