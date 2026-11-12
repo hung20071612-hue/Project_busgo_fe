@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import String, Boolean, DateTime, ForeignKey, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column
 import enum
+from sqlalchemy.orm import relationship
 
 from app.db.session import Base
 
@@ -26,3 +27,4 @@ class Bus(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
+    trips = relationship("Trip", back_populates="bus")

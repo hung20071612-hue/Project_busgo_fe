@@ -48,3 +48,8 @@ app.include_router(items.router, prefix="/api")
 @app.get("/")
 def root():
     return {"message": f"{settings.APP_NAME} đang chạy. Xem tài liệu API tại /docs"}
+
+from app.routers import stations, routes
+
+app.include_router(stations.router, prefix="/api/admin")
+app.include_router(routes.router, prefix="/api/admin")

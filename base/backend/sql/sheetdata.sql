@@ -26,7 +26,7 @@ INSERT INTO bus_types (name, floors, rows_per_floor, cols_per_floor, seat_type, 
 
 INSERT INTO buses (plate_number, bus_type_id, status, note) VALUES
 ('29B-12345', 1, 'active', 'Xe giường nằm chính'),
-('29B-12346', 1, 'active', NULL),ư
+('29B-12346', 1, 'active', NULL),
 ('29B-54321', 2, 'active', 'Xe ghế ngồi'),
 ('29B-54322', 2, 'active', NULL),
 ('15B-11111', 1, 'active', 'Xe tuyến Hải Phòng'),
