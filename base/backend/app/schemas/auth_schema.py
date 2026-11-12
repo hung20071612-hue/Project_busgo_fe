@@ -7,6 +7,29 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
+class RegisterRequest(BaseModel):
+    full_name: str = Field(min_length=5, examples=["Nguyễn Văn A"])
+    email: EmailStr = Field(examples=["abc@gmail.com"])
+    phone: str = Field(min_length=10, max_length=10)
+    password: str
+
+
+class RegisterResponse(BaseModel):
+    message: str
+    email: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class LoginResponse(BaseModel):
+    message: str
+    access_token: str
+    token_type: str
+    
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
 
 class ItemBase(BaseModel):
     name: str = Field(min_length=1, max_length=255, examples=["Cơm rang"])

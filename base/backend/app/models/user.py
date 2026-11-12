@@ -21,13 +21,13 @@ class UserStatus(enum.Enum):
     LOCKED = "locked"
 
 
-class User(Base):
+class UserModel(Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     full_name: Mapped[str] = mapped_column(String(100))
-    email: Mapped[str] = mapped_column(String(255))
-    phone: Mapped[str] = mapped_column(String(10))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    phone: Mapped[str] = mapped_column(String(10), unique=True)
     password_hash: Mapped[str] = mapped_column(String(60))
     role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
     status: Mapped[UserStatus] = mapped_column(default=UserStatus.ACTIVE)
