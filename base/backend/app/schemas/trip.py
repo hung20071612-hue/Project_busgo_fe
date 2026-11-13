@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -55,3 +55,20 @@ class TripOut(BaseModel):
     ticket_price: Decimal
     status: TripStatus
     created_at: datetime
+
+
+class TripConflictOut(BaseModel):
+    resource: str
+    trip_id: int
+    departure_at: datetime
+    arrival_at: datetime
+
+
+class RepeatSkippedOut(BaseModel):
+    date: date
+    conflicts: list[TripConflictOut]
+
+
+class TripRepeatOut(BaseModel):
+    created: list[TripOut]
+    skipped: list[RepeatSkippedOut]
