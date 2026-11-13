@@ -13,6 +13,8 @@ from app import models  # noqa: F401 - import để SQLAlchemy biết các bản
 from app.core.config import settings
 from app.db.session import Base, engine
 from app.routers import health, items, bookings
+from app.routers import auth_router, user, check_bookings, trips, cancel_booking
+from app.services import auth_service
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,8 +44,14 @@ app.add_middleware(
 # Mọi API đều bắt đầu bằng /api. Thêm router mới thì include ở đây.
 app.include_router(health.router, prefix="/api")
 app.include_router(items.router, prefix="/api")
+app.include_router(health.router, prefix="/api")
+app.include_router(items.router, prefix="/api")
 app.include_router(bookings.router, prefix="/api")
-
+app.include_router(auth_router.router, prefix="/api")
+app.include_router(user.router, prefix="/api")
+app.include_router(check_bookings.router, prefix="/api")
+app.include_router(trips.router, prefix="/api")
+app.include_router(cancel_booking.router, prefix="/api")
 
 @app.get("/")
 def root():
