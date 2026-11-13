@@ -73,20 +73,20 @@ def update_route(db: Session, route: Route, data: RouteUpdate) -> Route:
     return route
 
 
-# def delete_route(db: Session, route: Route) -> dict:
-#     """Tuyến đã có chuyến → ngừng hoạt động; chưa có → xóa cứng"""
-#     has_trips = db.scalar(
-#         select(Trip.id).where(Trip.route_id == route.id).limit(1)
-#     )
+def delete_route(db: Session, route: Route) -> dict:
+    """Tuyến đã có chuyến → ngừng hoạt động; chưa có → xóa cứng"""
+    has_trips = db.scalar(
+        select(Trip.id).where(Trip.route_id == route.id).limit(1)
+    )
 
-#     if has_trips:
-#         route.is_active = False
-#         db.commit()
-#         return {
-#             "action": "deactivated",
-#             "message": "Tuyến đã có chuyến, đã chuyển sang ngừng hoạt động"
-#         }
+    if has_trips:
+        route.is_active = False
+        db.commit()
+        return {
+            "action": "deactivated",
+            "message": "Tuyến đã có chuyến, đã chuyển sang ngừng hoạt động"
+        }
 
-#     db.delete(route)
-#     db.commit()
-#     return {"action": "deleted", "message": "Đã xóa tuyến"}
+    db.delete(route)
+    db.commit()
+    return {"action": "deleted", "message": "Đã xóa tuyến"}

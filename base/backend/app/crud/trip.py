@@ -2,6 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Booking, Bus, Driver, Route, Trip, TripStatus
+from app.models.bus import BusStatusEnum
+from app.models.driver import DriverStatusEnum
 from app.schemas.trip import TripCreate, TripUpdate
 
 
@@ -19,12 +21,12 @@ def validate_references(db: Session, route_id: int, bus_id: int, driver_id: int)
     bus = db.get(Bus, bus_id)
     if bus is None:
         return f"Không tìm thấy xe id={bus_id}"
-    if not bus.is_active:
+    if bus.status != BusStatusEnum.active:
         return f"Xe id={bus_id} hiện không hoạt động"
     driver = db.get(Driver, driver_id)
     if driver is None:
         return f"Không tìm thấy tài xế id={driver_id}"
-    if not driver.is_active:
+    if driver.status != DriverStatusEnum.active:
         return f"Tài xế id={driver_id} hiện không hoạt động"
     return None
 
@@ -49,7 +51,7 @@ def update_trip(db: Session, trip: Trip, data: TripUpdate) -> Trip:
 
 
 def has_bookings(db: Session, trip_id: int) -> bool:
-    return db.scalar(select(Booking.id).where(Booking.trip_id == trip_id).limit(1)) is not None
+    return db.scalar(select(Booking.booking_id).where(Booking.trip_id == trip_id).limit(1)) is not None
 
 
 def delete_trip(db: Session, trip: Trip) -> None:

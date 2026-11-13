@@ -3,20 +3,21 @@
 Khi làm đề tài, copy file này để tạo bảng của nhóm (vd: Product, Order, Movie...).
 """
 from datetime import datetime
-from decimal import Decimal
-
-from sqlalchemy import DateTime, Numeric, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
 import enum
+
+from sqlalchemy import DateTime, String, func
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
 
-class UserRole(enum.Enum):
+
+class UserRole(str, enum.Enum):
     ADMIN = "admin"
     USER = "user"
     STAFF = "staff"
 
-class UserStatus(enum.Enum):
+
+class UserStatus(str, enum.Enum):
     ACTIVE = "active"
     LOCKED = "locked"
 
