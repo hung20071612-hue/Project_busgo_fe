@@ -15,7 +15,7 @@ from app.db.session import Base, engine
 from app.routers import auth_router, user
 from app.services import auth_service
 
-from app.routers import health, items, bookings
+from app.routers import health, items, check_bookings, trips
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -47,7 +47,8 @@ app.include_router(health.router, prefix="/api")
 app.include_router(items.router, prefix="/api")
 app.include_router(auth_router.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
-app.include_router(bookings.router, prefix="/api")
+app.include_router(check_bookings.router, prefix="/api")
+app.include_router(trips.router, prefix="/api")
 
 
 @app.get("/")

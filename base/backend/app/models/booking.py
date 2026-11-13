@@ -1,4 +1,3 @@
-"""Models: Dat ve, giu ghe va thanh toan. Bang: bookings, booking_details, payments."""
 import enum
 from datetime import datetime
 from decimal import Decimal
@@ -29,15 +28,12 @@ class PaymentStatus(str, enum.Enum):
 
 
 class Booking(Base):
-    """Don dat ve."""
-
     __tablename__ = "bookings"
 
     booking_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     booking_code: Mapped[str] = mapped_column(String(20), unique=True)
-    # Kieu String(5) khop voi user.id trong ERD chung; doi thanh int neu nhom doi user.id sang INT
-    user_id: Mapped[str] = mapped_column(String(5), ForeignKey("user.id"), index=True)
-    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.trip_id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
+    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), index=True)
     total_price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     status: Mapped[BookingStatus] = mapped_column(
         Enum(BookingStatus), default=BookingStatus.PENDING_PAYMENT, index=True
@@ -49,6 +45,8 @@ class Booking(Base):
     )
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
+    user: Mapped["UserModel"] = relationship()
+    trip: Mapped["Trip"] = relationship(back_populates="bookings")
     details: Mapped[list["BookingDetail"]] = relationship(
         back_populates="booking", cascade="all, delete-orphan"
     )
@@ -56,18 +54,15 @@ class Booking(Base):
 
 
 class BookingDetail(Base):
-    """Tung ghe cua don. hold_until = han giu ghe (NULL khi da thanh toan)."""
-
     __tablename__ = "booking_details"
-    # Chong 2 nguoi cung dat 1 ghe cua 1 chuyen
     __table_args__ = (UniqueConstraint("trip_id", "seat_id", name="uq_trip_seat"),)
 
     detail_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     booking_id: Mapped[int] = mapped_column(
         ForeignKey("bookings.booking_id", ondelete="CASCADE"), index=True
     )
-    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.trip_id"))
-    seat_id: Mapped[int] = mapped_column(ForeignKey("seats.seat_id"))
+    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"))
+    seat_id: Mapped[int] = mapped_column(ForeignKey("seats.id"))
     passenger_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     passenger_phone: Mapped[str | None] = mapped_column(String(15), nullable=True)
     pickup: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -75,11 +70,11 @@ class BookingDetail(Base):
     hold_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
 
     booking: Mapped["Booking"] = relationship(back_populates="details")
+    trip: Mapped["Trip"] = relationship()
+    seat: Mapped["Seat"] = relationship()
 
 
 class Payment(Base):
-    """Thanh toan gia lap."""
-
     __tablename__ = "payments"
 
     payment_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

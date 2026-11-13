@@ -2,8 +2,8 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 
 from app.models.station import Station
-from app.models.route import Route
 from app.models.trip import Trip
+from app.models.route import Route
 from app.schemas.station import StationCreate, StationUpdate
 
 
