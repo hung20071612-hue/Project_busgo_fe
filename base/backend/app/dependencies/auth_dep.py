@@ -4,10 +4,11 @@ import jwt
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.models.user import UserModel
+from app.models.user import UserModel, UserStatus
 from app.core.config import settings
 
 security_scheme = HTTPBearer()
+
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
@@ -19,31 +20,32 @@ def get_current_user(
         detail="Token không hợp lệ hoặc đã hết hạn",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = jwt.decode(
-            token, 
-            settings.SECRET_KEY, 
+            token,
+            settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-            
+
     except jwt.PyJWTError:
         raise credentials_exception
 
     user = db.query(UserModel).filter(UserModel.id == int(user_id)).first()
     if user is None:
         raise credentials_exception
-        
-    if not user.status:
+
+    if user.status == UserStatus.LOCKED:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Tài khoản đã bị khóa"
         )
-        
+
     return user
+
 
 class RoleCheck:
 

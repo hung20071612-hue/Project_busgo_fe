@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import route as route_crud
 from app.db.session import get_db
+from app.dependencies.auth_dep import RoleCheck
 from app.schemas.route import RouteCreate, RouteOut, RouteUpdate
 
 router = APIRouter(prefix="/routes", tags=["Admin - Routes"])
@@ -25,16 +26,28 @@ def get_route(route=Depends(get_route_or_404)):
     return route
 
 
-@router.post("", response_model=RouteOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=RouteOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RoleCheck(["ADMIN"]))],
+)
 def create_route(data: RouteCreate, db: Session = Depends(get_db)):
     return route_crud.create_route(db, data)
 
 
-@router.put("/{route_id}", response_model=RouteOut)
+@router.put(
+    "/{route_id}",
+    response_model=RouteOut,
+    dependencies=[Depends(RoleCheck(["ADMIN"]))],
+)
 def update_route(data: RouteUpdate, route=Depends(get_route_or_404), db: Session = Depends(get_db)):
     return route_crud.update_route(db, route, data)
 
 
-@router.delete("/{route_id}")
+@router.delete(
+    "/{route_id}",
+    dependencies=[Depends(RoleCheck(["ADMIN"]))],
+)
 def delete_route(route=Depends(get_route_or_404), db: Session = Depends(get_db)):
     return route_crud.delete_route(db, route)

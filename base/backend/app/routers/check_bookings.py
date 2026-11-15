@@ -2,11 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.models.booking import Booking
-from app.models.booking import BookingDetail
-
+from app.dependencies.auth_dep import get_current_user
+from app.models.booking import Booking, BookingDetail
+from app.models.user import UserModel
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
+
+
+def _get_role_name(user: UserModel) -> str:
+    raw_role = user.role.value if hasattr(user.role, "value") else user.role
+    return str(raw_role).upper()
 
 
 # 1. Tra cứu vé bằng mã đặt vé và số điện thoại
@@ -46,18 +51,27 @@ def lookup_booking(
 # 2. Danh sách vé theo khách hàng và trạng thái
 @router.get("")
 def list_bookings(
-    user_id: str,
-    status: str = None,
-    db: Session = Depends(get_db)
+    user_id: int | None = None,
+    status: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
 ):
-    query = db.query(Booking).filter(
-        Booking.user_id == user_id
-    )
+    role = _get_role_name(current_user)
+    query = db.query(Booking)
+
+    if role in ("ADMIN", "STAFF"):
+        if user_id is not None:
+            query = query.filter(Booking.user_id == user_id)
+    else:
+        if user_id is not None and user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Bạn không có quyền xem vé của người dùng khác"
+            )
+        query = query.filter(Booking.user_id == current_user.id)
 
     if status:
-        query = query.filter(
-            Booking.status == status
-        )
+        query = query.filter(Booking.status == status)
 
     return query.all()
 
@@ -66,7 +80,8 @@ def list_bookings(
 @router.get("/{booking_id}")
 def get_booking(
     booking_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
 ):
     booking = db.query(Booking).filter(
         Booking.booking_id == booking_id
@@ -78,6 +93,13 @@ def get_booking(
             detail="Không tìm thấy vé"
         )
 
+    role = _get_role_name(current_user)
+    if role not in ("ADMIN", "STAFF") and booking.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền xem thông tin vé này"
+        )
+
     details = db.query(BookingDetail).filter(
         BookingDetail.booking_id == booking_id
     ).all()
@@ -86,5 +108,3 @@ def get_booking(
         "booking": booking,
         "details": details
     }
-    
-    

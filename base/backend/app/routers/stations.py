@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import station as station_crud
 from app.db.session import get_db
+from app.dependencies.auth_dep import RoleCheck
 from app.schemas.station import StationCreate, StationOut, StationUpdate
 
 router = APIRouter(prefix="/stations", tags=["Admin - Stations"])
@@ -25,16 +26,28 @@ def get_station(station=Depends(get_station_or_404)):
     return station
 
 
-@router.post("", response_model=StationOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=StationOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RoleCheck(["ADMIN"]))],
+)
 def create_station(data: StationCreate, db: Session = Depends(get_db)):
     return station_crud.create_station(db, data)
 
 
-@router.put("/{station_id}", response_model=StationOut)
+@router.put(
+    "/{station_id}",
+    response_model=StationOut,
+    dependencies=[Depends(RoleCheck(["ADMIN"]))],
+)
 def update_station(data: StationUpdate, station=Depends(get_station_or_404), db: Session = Depends(get_db)):
     return station_crud.update_station(db, station, data)
 
 
-@router.delete("/{station_id}")
+@router.delete(
+    "/{station_id}",
+    dependencies=[Depends(RoleCheck(["ADMIN"]))],
+)
 def delete_station(station=Depends(get_station_or_404), db: Session = Depends(get_db)):
     return station_crud.delete_station(db, station)

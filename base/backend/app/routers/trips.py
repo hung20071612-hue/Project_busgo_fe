@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.crud import trip as trip_crud
 from app.db.session import get_db
+from app.dependencies.auth_dep import RoleCheck
 from app.schemas.trip import TripCreate, TripOut, TripUpdate
 
 router = APIRouter(prefix="/trips", tags=["Trips"])
@@ -25,19 +28,51 @@ def get_trip(trip_id: int, db: Session = Depends(get_db)):
     return get_trip_or_404(trip_id, db)
 
 
-def validate_references(db: Session, route_id: int, bus_id: int, driver_id: int) -> None:
-    error = trip_crud.validate_references(db, route_id, bus_id, driver_id)
+def validate_references(
+    db: Session,
+    route_id: int,
+    bus_id: int,
+    driver_id: int,
+    departure_at: datetime | None = None,
+    arrival_at: datetime | None = None,
+    exclude_trip_id: int | None = None,
+) -> None:
+    error = trip_crud.validate_references(
+        db,
+        route_id,
+        bus_id,
+        driver_id,
+        departure_at=departure_at,
+        arrival_at=arrival_at,
+        exclude_trip_id=exclude_trip_id,
+    )
     if error:
         raise HTTPException(status_code=422, detail=error)
 
 
-@router.post("", response_model=TripOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=TripOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RoleCheck(["ADMIN", "STAFF"]))],
+)
 def create_trip(data: TripCreate, db: Session = Depends(get_db)):
-    validate_references(db, data.route_id, data.bus_id, data.driver_id)
+    validate_references(
+        db,
+        data.route_id,
+        data.bus_id,
+        data.driver_id,
+        departure_at=data.departure_at,
+        arrival_at=data.arrival_at,
+    )
     return trip_crud.create_trip(db, data)
 
 
-@router.put("/{trip_id}", response_model=TripOut)
+@router.put(
+    "/{trip_id}",
+    response_model=TripOut,
+    dependencies=[Depends(RoleCheck(["ADMIN", "STAFF"]))],
+)
 def update_trip(trip_id: int, data: TripUpdate, db: Session = Depends(get_db)):
     trip = get_trip_or_404(trip_id, db)
     values = {**{field: getattr(trip, field) for field in (
@@ -45,11 +80,23 @@ def update_trip(trip_id: int, data: TripUpdate, db: Session = Depends(get_db)):
     )}, **data.model_dump(exclude_unset=True, exclude={"status"})}
     if values["arrival_at"] <= values["departure_at"]:
         raise HTTPException(status_code=422, detail="Giờ đến phải sau giờ đi")
-    validate_references(db, values["route_id"], values["bus_id"], values["driver_id"])
+    validate_references(
+        db,
+        values["route_id"],
+        values["bus_id"],
+        values["driver_id"],
+        departure_at=values["departure_at"],
+        arrival_at=values["arrival_at"],
+        exclude_trip_id=trip_id,
+    )
     return trip_crud.update_trip(db, trip, data)
 
 
-@router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{trip_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RoleCheck(["ADMIN", "STAFF"]))],
+)
 def delete_trip(trip_id: int, db: Session = Depends(get_db)):
     trip = get_trip_or_404(trip_id, db)
     if trip_crud.has_bookings(db, trip_id):
