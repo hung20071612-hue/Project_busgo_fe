@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.booking import Booking
-from app.models.booking_detail import BookingDetail
+from app.models.booking import BookingDetail
 
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
