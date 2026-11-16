@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu vé | BusGo</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../">
+
+    <header id="app-header"></header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Tra cứu vé</h2>
+            <p>Nhập mã vé và số điện thoại để tra cứu thông tin.</p>
+
+            <form id="lookup-form">
+                <label for="booking-id">Mã vé</label>
+                <input
+                    type="number"
+                    id="booking-id"
+                    required
+                    min="1"
+                    placeholder="Nhập mã vé"
+                >
+
+                <label for="phone">Số điện thoại</label>
+                <input
+                    type="tel"
+                    id="phone"
+                    required
+                    placeholder="Nhập số điện thoại"
+                >
+
+                <button type="submit" class="btn btn-primary">
+                    Tra cứu
+                </button>
+            </form>
+
+            <div id="lookup-result"></div>
+        </section>
+    </main>
+
+    <footer id="app-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/booking-lookup.js"></script>
+
+</body>
+</html>
