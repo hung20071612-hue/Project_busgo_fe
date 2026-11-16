@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from datetime import date, time
+from decimal import Decimal
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.crud import trip as trip_crud
 from app.db.session import get_db
-from app.schemas.trip import TripCreate, TripOut, TripRepeatOut, TripUpdate
+from app.schemas.trip import TripCreate, TripOut, TripRepeatOut, TripSearchOut, TripUpdate
 
 router = APIRouter(prefix="/trips", tags=["Trips"])
 
@@ -18,6 +22,37 @@ def get_trip_or_404(trip_id: int, db: Session) -> object:
 @router.get("", response_model=list[TripOut])
 def list_trips(db: Session = Depends(get_db)):
     return trip_crud.list_trips(db)
+
+
+@router.get("/search", response_model=list[TripSearchOut])
+def search_trips(
+    origin: str = Query(min_length=1, description="Điểm đi (tìm gần đúng)"),
+    destination: str = Query(min_length=1, description="Điểm đến (tìm gần đúng)"),
+    travel_date: date = Query(description="Ngày khởi hành, định dạng YYYY-MM-DD"),
+    min_price: Decimal | None = Query(default=None, ge=0),
+    max_price: Decimal | None = Query(default=None, ge=0),
+    time_from: time | None = Query(default=None, description="Giờ đi sớm nhất, HH:MM"),
+    time_to: time | None = Query(default=None, description="Giờ đi muộn nhất, HH:MM"),
+    sort: Literal["departure_asc", "departure_desc", "price_asc", "price_desc"] = "departure_asc",
+    db: Session = Depends(get_db),
+):
+    if not origin.strip() or not destination.strip():
+        raise HTTPException(status_code=422, detail="Điểm đi và điểm đến không được để trống")
+    if min_price is not None and max_price is not None and min_price > max_price:
+        raise HTTPException(status_code=422, detail="min_price phải nhỏ hơn hoặc bằng max_price")
+    if (time_from is None) != (time_to is None):
+        raise HTTPException(status_code=422, detail="Cần truyền đồng thời time_from và time_to")
+    return trip_crud.search_trips(
+        db,
+        origin=origin,
+        destination=destination,
+        travel_date=travel_date,
+        min_price=min_price,
+        max_price=max_price,
+        time_from=time_from,
+        time_to=time_to,
+        sort=sort,
+    )
 
 
 @router.get("/{trip_id}", response_model=TripOut)

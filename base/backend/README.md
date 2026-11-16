@@ -169,3 +169,13 @@ Chỉ dành cho bạn nào đã biết Docker và không muốn cài MySQL. Tron
 Chạy thêm `sql/trips.sql` trong MySQL Workbench sau `sql/init.sql`. Script tạo các bảng `routes` (điểm đi/đến), `buses` (biển số/số ghế), `drivers`, `trips` (tuyến, xe, tài xế, giờ đi/đến, giá và trạng thái) và `bookings` (số ghế đã đặt). Khóa ngoại giữ liên kết giữa chuyến và các bảng liên quan; index hỗ trợ lọc chuyến theo tuyến/ngày và tổng hợp booking.
 
 Cuối script có câu JOIN mẫu, đặt `@origin`, `@destination` và `@travel_date` rồi chạy để tìm chuyến `SCHEDULED` trong ngày. `available_seats` bằng tổng số ghế của xe trừ tổng booking `CONFIRMED`; booking `CANCELLED` không bị tính. Chuyến hết ghế được lọc khỏi kết quả. Khi gọi từ ứng dụng, thay biến MySQL mẫu bằng bind parameters do driver hỗ trợ.
+
+### API tìm chuyến
+
+`GET /api/trips/search` nhận điểm đi, điểm đến và ngày khởi hành bắt buộc; điểm đi/đến được tìm gần đúng, không phân biệt hoa thường. API chỉ trả chuyến còn `SCHEDULED`, chưa tới giờ khởi hành và còn ghế trống. Có thể lọc thêm giá và khung giờ:
+
+```text
+GET /api/trips/search?origin=Hà Nội&destination=Đà Nẵng&travel_date=2026-11-20&min_price=300000&max_price=800000&time_from=06:00&time_to=12:00&sort=price_asc
+```
+
+`min_price`, `max_price`, `time_from` và `time_to` đều tùy chọn; nếu lọc giờ thì truyền cả hai. Khung giờ qua nửa đêm, ví dụ `22:00` đến `02:00`, được hỗ trợ. `sort` nhận `departure_asc` (mặc định), `departure_desc`, `price_asc` hoặc `price_desc`. Mỗi kết quả kèm `available_seats`, tính bằng số ghế xe trừ booking `CONFIRMED`; booking đã hủy không bị trừ. Giá không hợp lệ hoặc `min_price` lớn hơn `max_price` trả về HTTP 422.

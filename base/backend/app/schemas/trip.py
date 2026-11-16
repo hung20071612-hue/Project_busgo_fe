@@ -57,6 +57,22 @@ class TripOut(BaseModel):
     created_at: datetime
 
 
+class TripSearchOut(BaseModel):
+    """A bookable trip with its route and current seat availability."""
+
+    id: int
+    route_id: int
+    origin: str
+    destination: str
+    bus_id: int
+    plate_number: str
+    driver_id: int
+    departure_at: datetime
+    arrival_at: datetime
+    ticket_price: Decimal
+    available_seats: int
+
+
 class TripConflictOut(BaseModel):
     resource: str
     trip_id: int

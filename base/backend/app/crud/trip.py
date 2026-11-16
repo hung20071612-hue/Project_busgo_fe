@@ -1,14 +1,94 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
+from decimal import Decimal
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.models.trip import Booking, Bus, Driver, Route, Trip, TripStatus
+from app.models.trip import Booking, BookingStatus, Bus, Driver, Route, Trip, TripStatus
 from app.schemas.trip import TripCreate, TripUpdate
 
 
 def list_trips(db: Session) -> list[Trip]:
     return list(db.scalars(select(Trip).order_by(Trip.departure_at.desc(), Trip.id.desc())))
+
+
+def search_trips(
+    db: Session,
+    *,
+    origin: str,
+    destination: str,
+    travel_date: date,
+    min_price: Decimal | None = None,
+    max_price: Decimal | None = None,
+    time_from: time | None = None,
+    time_to: time | None = None,
+    sort: str = "departure_asc",
+) -> list[dict]:
+    confirmed_bookings = (
+        select(func.count(Booking.id))
+        .where(
+            Booking.trip_id == Trip.id,
+            Booking.status == BookingStatus.CONFIRMED,
+        )
+        .correlate(Trip)
+        .scalar_subquery()
+    )
+    available_seats = Bus.seat_count - confirmed_bookings
+    start_of_day = datetime.combine(travel_date, time.min)
+    start_of_next_day = start_of_day + timedelta(days=1)
+
+    query = (
+        select(
+            Trip.id,
+            Trip.route_id,
+            Route.origin,
+            Route.destination,
+            Trip.bus_id,
+            Bus.plate_number,
+            Trip.driver_id,
+            Trip.departure_at,
+            Trip.arrival_at,
+            Trip.ticket_price,
+            available_seats.label("available_seats"),
+        )
+        .join(Route, Trip.route_id == Route.id)
+        .join(Bus, Trip.bus_id == Bus.id)
+        .where(
+            Route.origin.ilike(f"%{origin.strip()}%"),
+            Route.destination.ilike(f"%{destination.strip()}%"),
+            Trip.departure_at >= start_of_day,
+            Trip.departure_at < start_of_next_day,
+            Trip.departure_at > func.now(),
+            Trip.status == TripStatus.SCHEDULED,
+            available_seats > 0,
+        )
+    )
+    if min_price is not None:
+        query = query.where(Trip.ticket_price >= min_price)
+    if max_price is not None:
+        query = query.where(Trip.ticket_price <= max_price)
+    if time_from is not None and time_to is not None:
+        if time_from <= time_to:
+            query = query.where(
+                Trip.departure_at >= datetime.combine(travel_date, time_from),
+                Trip.departure_at <= datetime.combine(travel_date, time_to),
+            )
+        else:
+            # A range such as 22:00–02:00 crosses midnight.
+            query = query.where(
+                or_(
+                    Trip.departure_at >= datetime.combine(travel_date, time_from),
+                    Trip.departure_at <= datetime.combine(travel_date, time_to),
+                )
+            )
+
+    ordering = {
+        "departure_asc": (Trip.departure_at.asc(), Trip.id.asc()),
+        "departure_desc": (Trip.departure_at.desc(), Trip.id.desc()),
+        "price_asc": (Trip.ticket_price.asc(), Trip.departure_at.asc(), Trip.id.asc()),
+        "price_desc": (Trip.ticket_price.desc(), Trip.departure_at.asc(), Trip.id.asc()),
+    }
+    return [dict(row) for row in db.execute(query.order_by(*ordering[sort])).mappings()]
 
 
 def get_trip(db: Session, trip_id: int) -> Trip | None:
