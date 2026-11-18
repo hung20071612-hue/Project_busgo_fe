@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập Quản trị - BusGo</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="admin-auth-page">
+  <div class="admin-auth-card">
+    <div class="admin-auth-header">
+      <div class="admin-logo-wrap">
+        <span class="admin-logo-badge">BUSGO</span>
+        <span class="admin-logo-text">ADMIN PORTAL</span>
+      </div>
+      <h1>Đăng nhập hệ thống quản trị</h1>
+      <p>Khu vực dành riêng cho Quản trị viên (Admin) và Nhân viên vận hành</p>
+    </div>
+
+    <div class="admin-auth-body">
+      <div id="adminAuthAlert" class="alert"></div>
+
+      <form id="adminLoginForm">
+        <div class="form-group">
+          <label class="form-label" for="adminEmail">Email quản trị</label>
+          <input
+            type="email"
+            id="adminEmail"
+            class="form-control"
+            placeholder="admin@busgo.vn"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adminPassword">Mật khẩu</label>
+          <div class="input-wrap">
+            <input
+              type="password"
+              id="adminPassword"
+              class="form-control"
+              placeholder="Nhập mật khẩu quản trị"
+              required
+            />
+            <button type="button" class="toggle-pass" data-toggle-password="adminPassword">
+              Hiện
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="adminLoginSubmitBtn" class="btn btn-primary btn-block">
+          Đăng nhập vào Quản trị
+        </button>
+      </form>
+
+      <div class="admin-auth-footer">
+        <a href="../index.html">← Quay lại trang đặt vé Khách hàng</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/guard.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

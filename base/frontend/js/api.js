@@ -1,62 +1,131 @@
 // Module gọi API bằng axios: cấu hình 1 lần, mọi trang dùng chung.
-// (axios được nạp từ CDN bằng thẻ <script> trong từng trang HTML, trước file này)
-//
-// Cách dùng (trong các file js/pages/*.js):
-//   const items = await api.get("/items");
-//   const items = await api.get("/items", { q: "com" });          // -> /items?q=com
-//   const created = await api.post("/items", { name: "Trà đá", price: 5000 });
-//   await api.put("/items/1", { name: "Tên mới" });
-//   await api.delete("/items/1");
-//
-// Các hàm trả về thẳng dữ liệu JSON (đã lấy sẵn response.data).
-// Nếu lỗi, hàm sẽ throw ApiError -> bắt bằng try/catch và hiện error.message cho người dùng.
+// (axios được nạp từ CDN bằng thẻ <script> trước file này, sau js/config.js)
 
 class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
-    this.status = status; // mã HTTP: 404, 422, 500... (0 = không gọi được server)
+    this.status = status; // mã HTTP: 401, 403, 404, 422, 500... (0 = không gọi được server)
     this.data = data; // nội dung lỗi gốc server trả về
   }
+}
+
+// Quản lý lưu trữ Token & thông tin User hiện tại
+const authStorage = {
+  getToken() {
+    return localStorage.getItem(CONFIG.TOKEN_KEY);
+  },
+  setToken(token) {
+    localStorage.setItem(CONFIG.TOKEN_KEY, token);
+  },
+  getUser() {
+    const raw = localStorage.getItem(CONFIG.USER_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  },
+  setUser(user) {
+    localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user));
+  },
+  clear() {
+    localStorage.removeItem(CONFIG.TOKEN_KEY);
+    localStorage.removeItem(CONFIG.USER_KEY);
+  },
+};
+
+function getRootPath() {
+  return document.body?.dataset?.root || (window.location.pathname.includes("/admin/") ? "../" : "./");
+}
+
+function getLoginUrl() {
+  const root = getRootPath();
+  const isAdminArea =
+    document.body?.dataset?.layout === "admin" || window.location.pathname.includes("/admin/");
+  return isAdminArea ? `${root}admin/login.html` : `${root}login.html`;
+}
+
+function logoutUser() {
+  const loginUrl = getLoginUrl();
+  authStorage.clear();
+  window.location.href = loginUrl;
 }
 
 // Instance axios dùng chung: mọi request tự nối thêm baseURL phía trước
 const http = axios.create({
   baseURL: CONFIG.API_BASE_URL,
-  timeout: 10000, // quá 10 giây không phản hồi thì báo lỗi
+  timeout: 10000,
   headers: { "Content-Type": "application/json" },
 });
 
-// Muốn gửi token đăng nhập cho mọi request (khi nhóm làm chức năng login), bỏ comment đoạn dưới:
-// http.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("token");
-//   if (token) config.headers.Authorization = `Bearer ${token}`;
-//   return config;
-// });
+// Request Interceptor: tự động gửi kèm Bearer Token cho mọi request
+http.interceptors.request.use(
+  (config) => {
+    const token = authStorage.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// Lấy câu thông báo lỗi dễ đọc từ response của FastAPI
+// Lấy câu thông báo lỗi dễ đọc (hỗ trợ cả format FastAPI mặc định và global_exception_handler)
 function getErrorMessage(data, status) {
-  if (data && typeof data.detail === "string") return data.detail;
-  // Lỗi 422 (dữ liệu không hợp lệ): detail là mảng [{ loc: [...], msg: "..." }]
-  if (data && Array.isArray(data.detail)) {
-    return data.detail.map((e) => `${e.loc[e.loc.length - 1]}: ${e.msg}`).join("; ");
+  if (!data) return `Lỗi ${status}`;
+  if (typeof data.message === "string" && data.message) return data.message;
+  if (typeof data.detail === "string" && data.detail) return data.detail;
+
+  const errorList = Array.isArray(data.details)
+    ? data.details
+    : Array.isArray(data.detail)
+      ? data.detail
+      : null;
+
+  if (errorList) {
+    return errorList
+      .map((e) => {
+        const field = Array.isArray(e.loc) ? e.loc[e.loc.length - 1] : "";
+        return field ? `${field}: ${e.msg}` : e.msg;
+      })
+      .join("; ");
   }
   return `Lỗi ${status}`;
 }
 
-// Gom xử lý lỗi một chỗ: đổi lỗi của axios thành ApiError dễ dùng
+// Response Interceptor: xử lý lỗi 401/403 tập trung và đổi lỗi axios thành ApiError
 http.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // Server có trả lời nhưng là lỗi (4xx, 5xx)
       const { status, data } = error.response;
-      return Promise.reject(new ApiError(getErrorMessage(data, status), status, data));
+      const message = getErrorMessage(data, status);
+      const requestUrl = error.config?.url || "";
+
+      // Token hết hạn hoặc không hợp lệ -> xóa phiên và đẩy về đúng trang đăng nhập
+      if (status === 401 && !requestUrl.includes("/auth/login")) {
+        authStorage.clear();
+        window.location.href = getLoginUrl();
+      }
+
+      // Tài khoản bị khóa -> đăng xuất bắt buộc
+      if (status === 403 && message.toLowerCase().includes("khóa")) {
+        authStorage.clear();
+        alert(message);
+        window.location.href = getLoginUrl();
+      }
+
+      return Promise.reject(new ApiError(message, status, data));
     }
-    // Không có response: server tắt, sai URL, bị chặn CORS, hoặc quá thời gian chờ
-    return Promise.reject(new ApiError(
-      "Không kết nối được backend. Backend đã chạy chưa? Kiểm tra CONFIG.API_BASE_URL.", 0,
-    ));
-  },
+
+    return Promise.reject(
+      new ApiError(
+        "Không kết nối được backend. Backend đã chạy chưa? Kiểm tra CONFIG.API_BASE_URL.",
+        0
+      )
+    );
+  }
 );
 
 const api = {

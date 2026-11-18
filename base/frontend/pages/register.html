@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký tài khoản - BusGo</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-topbar">
+    <div class="auth-topbar-inner">
+      <a href="index.html" class="brand-logo">
+        <span class="brand-badge">BUSGO</span>
+        <span>BusGo</span>
+      </a>
+      <a href="index.html" class="back-home-link">← Quay lại trang đặt vé</a>
+    </div>
+  </div>
+
+  <main class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-banner">
+        <div>
+          <span class="auth-banner-tag">Thành viên mới</span>
+          <h2>Tạo tài khoản BusGo miễn phí</h2>
+          <p>Trải nghiệm đặt vé xe khách liên tỉnh chuẩn quốc tế với hàng trăm tuyến đi Hà Nội mỗi ngày.</p>
+          <ul class="auth-perks">
+            <li>Tự động lưu thông tin hành khách khi đặt vé</li>
+            <li>Nhận thông báo giờ khởi hành & điểm đón</li>
+            <li>Theo dõi trạng thái thanh toán tức thì</li>
+          </ul>
+        </div>
+        <small>BusGo Vietnam • Nhóm 5</small>
+      </div>
+
+      <div class="auth-form-box">
+        <div class="auth-tabs">
+          <a href="login.html" class="auth-tab">Đăng nhập</a>
+          <a href="register.html" class="auth-tab active">Đăng ký</a>
+        </div>
+
+        <h1 class="auth-title">Đăng ký tài khoản mới</h1>
+        <p class="auth-subtitle">Điền đầy đủ thông tin bên dưới để tạo tài khoản</p>
+
+        <div id="authAlert" class="alert"></div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label class="form-label" for="regFullName">Họ và tên</label>
+            <input
+              type="text"
+              id="regFullName"
+              class="form-control"
+              placeholder="Nguyễn Văn A (tối thiểu 5 ký tự)"
+              minlength="5"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regEmail">Email</label>
+            <input
+              type="email"
+              id="regEmail"
+              class="form-control"
+              placeholder="abc@gmail.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPhone">Số điện thoại</label>
+            <input
+              type="tel"
+              id="regPhone"
+              class="form-control"
+              placeholder="0912345678 (10 chữ số)"
+              maxlength="10"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Mật khẩu</label>
+            <div class="input-wrap">
+              <input
+                type="password"
+                id="regPassword"
+                class="form-control"
+                placeholder="Tạo mật khẩu"
+                required
+              />
+              <button type="button" class="toggle-pass" data-toggle-password="regPassword">Hiện</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regConfirmPassword">Xác nhận mật khẩu</label>
+            <div class="input-wrap">
+              <input
+                type="password"
+                id="regConfirmPassword"
+                class="form-control"
+                placeholder="Nhập lại mật khẩu"
+                required
+              />
+              <button type="button" class="toggle-pass" data-toggle-password="regConfirmPassword">Hiện</button>
+            </div>
+          </div>
+
+          <button type="submit" id="registerSubmitBtn" class="btn btn-primary btn-block">
+            Đăng ký tài khoản
+          </button>
+        </form>
+
+        <div class="auth-switch">
+          Đã có tài khoản? <a href="login.html">Đăng nhập ngay</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/guard.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
