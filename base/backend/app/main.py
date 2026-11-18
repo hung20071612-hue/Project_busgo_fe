@@ -17,6 +17,8 @@ from app.routers import health, items
 from app.routers import stations, routes
 from app.routers import stations, routes, bus_types
 
+from app.routers import buses, drivers
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Tự tạo các bảng còn thiếu khi server khởi động (bảng đã có thì bỏ qua).
@@ -58,3 +60,7 @@ app.include_router(routes.router, prefix="/api/admin")
 app.include_router(stations.router, prefix="/api/admin")
 app.include_router(routes.router, prefix="/api/admin")
 app.include_router(bus_types.router, prefix="/api/admin")
+
+
+app.include_router(buses.router, prefix="/api/admin")
+app.include_router(drivers.router, prefix="/api/admin")

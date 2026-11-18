@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.crud import route as route_crud
 from app.db.session import get_db
 from app.schemas.route import RouteCreate, RouteOut, RouteUpdate
+from app.dependencies.auth_dep import RoleCheck
+from app.models.user import UserModel
 
 router = APIRouter(prefix="/routes", tags=["Admin - Routes"])
 
@@ -16,25 +18,46 @@ def get_route_or_404(route_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[RouteOut])
-def list_routes(q: str | None = None, active_only: bool = False, db: Session = Depends(get_db)):
+def list_routes(
+    q: str | None = None,
+    active_only: bool = False,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(RoleCheck(["ADMIN"])),
+):
     return route_crud.get_routes(db, keyword=q, active_only=active_only)
 
 
 @router.get("/{route_id}", response_model=RouteOut)
-def get_route(route=Depends(get_route_or_404)):
+def get_route(
+    route=Depends(get_route_or_404),
+    current_user: UserModel = Depends(RoleCheck(["ADMIN"])),
+):
     return route
 
 
 @router.post("", response_model=RouteOut, status_code=status.HTTP_201_CREATED)
-def create_route(data: RouteCreate, db: Session = Depends(get_db)):
+def create_route(
+    data: RouteCreate,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(RoleCheck(["ADMIN"])),
+):
     return route_crud.create_route(db, data)
 
 
 @router.put("/{route_id}", response_model=RouteOut)
-def update_route(data: RouteUpdate, route=Depends(get_route_or_404), db: Session = Depends(get_db)):
+def update_route(
+    data: RouteUpdate,
+    route=Depends(get_route_or_404),
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(RoleCheck(["ADMIN"])),
+):
     return route_crud.update_route(db, route, data)
 
 
 @router.delete("/{route_id}")
-def delete_route(route=Depends(get_route_or_404), db: Session = Depends(get_db)):
+def delete_route(
+    route=Depends(get_route_or_404),
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(RoleCheck(["ADMIN"])),
+):
     return route_crud.delete_route(db, route)
