@@ -117,3 +117,30 @@ th { font-size: 13px; color: var(--color-muted); text-transform: uppercase; }
 }
 .toast-success { background: var(--color-success); }
 .toast-error { background: var(--color-danger); }
+
+/* ---------- Tìm chuyến xe ---------- */
+.trips-page { max-width: 900px; }
+.trip-search-form { margin-top: 20px; }
+.trip-search-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.trip-search-fields input, .trip-search-fields select { min-height: 42px; }
+.trip-filters { margin: 18px 0; }
+.trip-filters summary { color: var(--color-primary); cursor: pointer; font-weight: 600; }
+.trip-search-fields-optional { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 8px; }
+.trip-results-section > h2 { margin-bottom: 4px; }
+.trip-results { display: grid; gap: 12px; }
+.trip-result-card { margin: 0; }
+.trip-route { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; }
+.trip-route > div { display: grid; gap: 3px; }
+.trip-route > div:last-child { text-align: right; }
+.trip-label { color: var(--color-muted); font-size: 13px; }
+.trip-arrow { color: var(--color-muted); font-size: 24px; }
+.trip-details { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--color-border); margin-top: 16px; padding-top: 12px; }
+.trip-price { color: var(--color-primary-dark); margin-left: auto; font-size: 18px; }
+select { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-card); font: inherit; }
+
+@media (max-width: 650px) {
+  .trip-search-fields, .trip-search-fields-optional { grid-template-columns: 1fr; }
+  .trip-route { gap: 8px; }
+  .trip-details { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .trip-price { margin-left: 0; }
+}
