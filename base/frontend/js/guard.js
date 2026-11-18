@@ -4,7 +4,7 @@ function requireAuth() {
   const token = authStorage.getToken();
   const user = authStorage.getUser();
   if (!token || !user) {
-    window.location.href = `${getRootPath()}login.html`;
+    window.location.replace(`${getRootPath()}admin-login.html`);
     return null;
   }
   return user;
@@ -16,7 +16,7 @@ function requireRole(allowedRoles = []) {
   const user = authStorage.getUser();
 
   if (!token || !user) {
-    window.location.href = `${root}admin/login.html`;
+    window.location.replace(`${root}admin/admin-login.html`);
     return null;
   }
 
@@ -25,9 +25,17 @@ function requireRole(allowedRoles = []) {
 
   if (!normalizedAllowed.includes(userRole)) {
     alert("Bạn không có quyền truy cập khu vực quản trị!");
-    window.location.href = `${root}index.html`;
+    window.location.replace(`${root}index.html`);
     return null;
   }
+
+  // Xác thực lại token với backend; nếu token đã hết hạn, interceptor 401 tự đẩy về admin/login.html
+  if (typeof api !== "undefined") {
+    api.get("/users/me")
+      .then((freshUser) => authStorage.setUser(freshUser))
+      .catch(() => {});
+  }
+
   return user;
 }
 
@@ -35,7 +43,7 @@ function redirectIfAuthenticated() {
   const token = authStorage.getToken();
   const user = authStorage.getUser();
   if (token && user) {
-    window.location.href = `${getRootPath()}index.html`;
+    window.location.replace(`${getRootPath()}index.html`);
   }
 }
 
@@ -45,7 +53,7 @@ function redirectIfAdminAuthenticated() {
   if (token && user) {
     const role = String(user.role || "").toUpperCase();
     if (role === "ADMIN" || role === "STAFF") {
-      window.location.href = `${getRootPath()}admin/dashboard.html`;
+      window.location.replace(`${getRootPath()}admin/dashboard.html`);
     }
   }
 }

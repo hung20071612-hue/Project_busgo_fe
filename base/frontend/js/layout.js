@@ -1,8 +1,3 @@
-// Layout dùng chung cho toàn dự án:
-// 1. Layout Khách hàng: dùng <body data-root="./"> với <header id="app-header"> và <footer id="app-footer">
-// 2. Layout Admin:      dùng <body data-root="../" data-layout="admin" data-menu="dashboard" data-title="...">
-//                       với <aside id="admin-sidebar"> và <header id="admin-topbar">
-
 const CUSTOMER_MENU = [
   { href: "index.html", label: "Vé xe khách", roles: ["GUEST", "USER", "STAFF", "ADMIN"] },
   { href: "pages/lookup.html", label: "Tra cứu vé", roles: ["GUEST", "USER", "STAFF", "ADMIN"] },
@@ -157,7 +152,16 @@ function renderAdminLayout(activeMenuOverride, pageTitleOverride) {
 }
 
 function renderLayout() {
-  if (document.body?.dataset?.layout === "admin") {
+  const path = window.location.pathname.toLowerCase();
+  if (path.endsWith("/login.html") || path.endsWith("/register.html")) {
+    return;
+  }
+
+  const isAdminPage =
+    document.body?.dataset?.layout === "admin" ||
+    path.includes("/admin/");
+
+  if (isAdminPage) {
     renderAdminLayout();
   } else {
     renderCustomerLayout();
