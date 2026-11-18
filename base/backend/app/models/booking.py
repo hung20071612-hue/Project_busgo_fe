@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
-    DateTime, Enum, ForeignKey, Numeric, String, UniqueConstraint, func,
+    Boolean, DateTime, Enum, ForeignKey, Numeric, String, UniqueConstraint, func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -67,8 +67,11 @@ class BookingDetail(Base):
     passenger_phone: Mapped[str | None] = mapped_column(String(15), nullable=True)
     pickup: Mapped[str | None] = mapped_column(String(255), nullable=True)
     dropoff: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    hold_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
-
+    # Trạng thái hành khách đã lên xe
+    is_boarded: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="0", nullable=False
+    )
+    boarded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     booking: Mapped["Booking"] = relationship(back_populates="details")
     trip: Mapped["Trip"] = relationship()
     seat: Mapped["Seat"] = relationship()
