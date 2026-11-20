@@ -8,12 +8,13 @@ Cách hoạt động:
   người còn lại nhận lỗi 409.
 - Mọi so sánh thời gian dùng NOW() của MySQL (cùng đồng hồ với seat_map).
 """
-import secrets
 from datetime import datetime
 
 from sqlalchemy import bindparam, text
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
+
+from app.crud.booking import generate_booking_code
 
 MAX_SEATS_PER_HOLD = 5
 HOLD_MINUTES = 10
@@ -190,7 +191,7 @@ def hold_seats(
                     text(f"SELECT NOW() + INTERVAL {HOLD_MINUTES} MINUTE")
                 ).scalar()
             if booking_id is None:
-                code = f"BG{datetime.now():%y%m%d}{secrets.token_hex(3).upper()}"
+                code = generate_booking_code(db)
                 booking_id = db.execute(
                     text(
                         "INSERT INTO bookings (booking_code, user_id, trip_id, total_price, status) "
