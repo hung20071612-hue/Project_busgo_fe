@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách hành khách và soát vé</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../">
+    <header id="app-header"></header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Danh sách hành khách và soát vé</h2>
+
+            <h3>Chọn chuyến xe hôm nay</h3>
+            <select id="tripSelect">
+                <option value="">Đang tải chuyến xe...</option>
+            </select>
+            <button onclick="loadPassengers()">Xem danh sách</button>
+
+            <h3>Danh sách hành khách</h3>
+            <table border="1" cellpadding="8" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã vé</th>
+                        <th>Họ tên</th>
+                        <th>Số điện thoại</th>
+                        <th>Số ghế</th>
+                        <th>Trạng thái</th>
+                        <th>Soát vé</th>
+                    </tr>
+                </thead>
+                <tbody id="passengerList">
+                    <tr>
+                        <td colspan="7">Chưa có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button onclick="window.print()">In danh sách hành khách</button>
+        </section>
+    </main>
+
+    <footer id="app-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/staff-passengers.js"></script>
+</body>
+</html>

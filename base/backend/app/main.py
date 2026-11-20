@@ -1,3 +1,4 @@
+
 """Điểm khởi động của backend.
 
 Chạy:  uvicorn app.main:app --reload
@@ -15,7 +16,20 @@ from app import models  # noqa: F401 - import để SQLAlchemy biết các bản
 from app.core.config import settings
 from app.core.exceptions import global_exception_handler
 from app.db.session import Base, engine
-from app.routers import auth_router, check_bookings, health, routes, stations, trips, user
+from app.routers import (
+    auth_router,
+    bookings,
+    cancel_booking,
+    check_bookings,
+    health,
+    items,
+    routes,
+    stations,
+    trips,
+    user,
+    statistics,
+)
+
 
 
 @asynccontextmanager
@@ -50,12 +64,16 @@ app.add_middleware(
 
 # Mọi API đều bắt đầu bằng /api. Thêm router mới thì include ở đây.
 app.include_router(health.router, prefix="/api")
+app.include_router(items.router, prefix="/api")
+app.include_router(bookings.router, prefix="/api")
 app.include_router(auth_router.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(check_bookings.router, prefix="/api")
 app.include_router(trips.router, prefix="/api")
+app.include_router(cancel_booking.router, prefix="/api")
 app.include_router(stations.router, prefix="/api/admin")
 app.include_router(routes.router, prefix="/api/admin")
+app.include_router(statistics.router, prefix="/api")
 
 
 @app.get("/")
