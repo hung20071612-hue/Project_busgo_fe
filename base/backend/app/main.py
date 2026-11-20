@@ -27,7 +27,9 @@ from app.routers import (
     stations,
     trips,
     user,
+    statistics,
 )
+
 
 
 @asynccontextmanager
@@ -71,6 +73,7 @@ app.include_router(trips.router, prefix="/api")
 app.include_router(cancel_booking.router, prefix="/api")
 app.include_router(stations.router, prefix="/api/admin")
 app.include_router(routes.router, prefix="/api/admin")
+app.include_router(statistics.router, prefix="/api")
 
 
 @app.get("/")
