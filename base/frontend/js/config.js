@@ -6,5 +6,5 @@ const apiOverride = new URLSearchParams(window.location.search).get("api");
 const apiHost = window.location.hostname || "127.0.0.1";
 const CONFIG = {
   API_BASE_URL: apiOverride || `${window.location.protocol === "https:" ? "https:" : "http:"}//${apiHost}:8000/api`,
-  APP_NAME: "KS25 Base",
+  APP_NAME: "BusGo",
 };

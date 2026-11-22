@@ -3,41 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang chủ | KS25 Base</title>
+  <meta name="theme-color" content="#f5f8ff">
+  <meta name="description" content="Tìm và đặt vé xe khách liên tỉnh nhanh chóng cùng BusGo.">
+  <title>BusGo | Đặt vé xe khách dễ dàng</title>
   <link rel="icon" href="assets/images/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-root="./">
+<body data-root="./" class="home-page">
   <header id="app-header"></header>
 
-  <main class="container">
-    <section class="card">
-      <h1>Base code Frontend (HTML · CSS · JS)</h1>
-      <p>Khung dự án cho các nhóm thực tập. Trang này kiểm tra kết nối <strong>Frontend → Backend → MySQL</strong>.</p>
+  <main>
+    <section class="home-hero">
+      <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
+      <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <span class="eyebrow hero-eyebrow"><span class="eyebrow-dot"></span> Đặt vé dễ dàng · Đi muôn nơi</span>
+        <h1>Hành trình của bạn,<br><span>bắt đầu từ đây.</span></h1>
+        <p class="hero-copy">Tìm chuyến xe phù hợp, chọn giờ khởi hành và an tâm lên đường cùng BusGo.</p>
 
-      <p>API đang dùng: <code id="api-url"></code> <span class="muted">(sửa trong <code>js/config.js</code>)</span></p>
-      <div id="health-status" class="status"></div>
-      <button id="btn-recheck" class="btn">Kiểm tra lại</button>
+        <form id="home-search-form" class="home-search-card" action="pages/trips.html" method="get">
+          <div class="journey-tabs" role="group" aria-label="Loại hành trình">
+            <span class="journey-tab journey-tab-active">● Một chiều</span>
+            <span class="journey-note"><span>✓</span> Giá vé minh bạch</span>
+          </div>
+          <div class="home-search-fields">
+            <label class="search-field" for="home-origin">
+              <span class="field-icon" aria-hidden="true">↗</span>
+              <span class="field-content"><span class="field-label">Điểm đi</span>
+                <input id="home-origin" name="origin" list="city-options" required autocomplete="off" placeholder="Bạn đi từ đâu?">
+              </span>
+            </label>
+            <button class="swap-cities" id="swap-cities" type="button" aria-label="Đổi điểm đi và điểm đến">⇄</button>
+            <label class="search-field" for="home-destination">
+              <span class="field-icon field-icon-destination" aria-hidden="true">⌖</span>
+              <span class="field-content"><span class="field-label">Điểm đến</span>
+                <input id="home-destination" name="destination" list="city-options" required autocomplete="off" placeholder="Bạn muốn đến đâu?">
+              </span>
+            </label>
+            <datalist id="city-options">
+              <option value="Hà Nội"><option value="TP. Hồ Chí Minh"><option value="Đà Nẵng">
+              <option value="Sapa"><option value="Đà Lạt"><option value="Quy Nhơn">
+              <option value="Hà Giang"><option value="Vũng Tàu"><option value="Hạ Long">
+            </datalist>
+            <label class="search-field search-field-date" for="home-travel-date">
+              <span class="field-icon" aria-hidden="true">▦</span>
+              <span class="field-content"><span class="field-label">Ngày khởi hành</span>
+                <input id="home-travel-date" name="travel_date" type="date" required>
+              </span>
+            </label>
+            <button class="btn btn-accent home-search-submit" type="submit"><span aria-hidden="true">⌕</span> Tìm chuyến xe</button>
+          </div>
+          <p id="home-search-feedback" class="text-error form-feedback" role="alert" hidden></p>
+          <div class="quick-routes">
+            <span>Gợi ý tìm nhanh:</span>
+            <button type="button" class="route-chip" data-origin="Hà Nội" data-destination="Sapa">Hà Nội <span>→</span> Sapa</button>
+            <button type="button" class="route-chip" data-origin="TP. Hồ Chí Minh" data-destination="Đà Lạt">TP. Hồ Chí Minh <span>→</span> Đà Lạt</button>
+            <button type="button" class="route-chip" data-origin="Đà Nẵng" data-destination="Quy Nhơn">Đà Nẵng <span>→</span> Quy Nhơn</button>
+          </div>
+        </form>
+        <div class="hero-trust"><span>✓</span> Đặt vé an toàn <span>·</span> Hỗ trợ mỗi ngày <span>·</span> Dễ dàng đổi chuyến</div>
+      </div>
+      <div class="hero-scenery" aria-hidden="true"><div class="scenery-sun"></div><div class="scenery-mountain mountain-back"></div><div class="scenery-mountain mountain-front"></div><div class="scenery-road"></div></div>
     </section>
 
-    <section class="card">
-      <h2>Bắt đầu từ đâu?</h2>
-      <ol>
-        <li>Xem trang <a href="pages/items.html">Items</a>: ví dụ thêm / sửa / xoá / tìm kiếm gọi API thật.</li>
-        <li>Đọc <code>js/api.js</code> để biết cách gọi API bằng axios.</li>
-        <li>Tạo trang mới: copy <code>pages/items.html</code> + <code>js/pages/items.js</code>, thêm link vào <code>js/layout.js</code>.</li>
-      </ol>
+    <section class="service-strip" aria-label="Cam kết BusGo">
+      <div class="container service-grid">
+        <article class="service-item"><span class="service-icon">♧</span><div><strong>An tâm trên mọi chuyến đi</strong><p>Thông tin rõ ràng, hỗ trợ tận tâm</p></div></article>
+        <article class="service-item"><span class="service-icon service-blue">↻</span><div><strong>Đặt vé nhanh chóng</strong><p>Chọn chuyến chỉ trong vài bước</p></div></article>
+        <article class="service-item"><span class="service-icon service-orange">▣</span><div><strong>Nhiều tuyến đường</strong><p>Kết nối những điểm đến yêu thích</p></div></article>
+      </div>
+    </section>
+
+    <section class="popular-section container">
+      <div class="section-heading">
+        <div><span class="eyebrow">KHÁM PHÁ VIỆT NAM</span><h2>Tuyến đường phổ biến</h2><p class="muted">Chọn một hành trình và bắt đầu chuyến đi tiếp theo của bạn.</p></div>
+        <a class="text-link" href="pages/trips.html">Tìm chuyến xe <span>→</span></a>
+      </div>
+      <div class="popular-grid">
+        <button class="popular-card route-chip-card route-sapa" data-origin="Hà Nội" data-destination="Sapa" type="button"><span class="route-card-overlay"></span><span class="route-card-content"><span class="route-distance">MIỀN BẮC · 315 KM</span><strong>Hà Nội <i>→</i> Sapa</strong><span class="route-card-foot">Khám phá vùng núi phía Bắc <b>↗</b></span></span></button>
+        <button class="popular-card route-chip-card route-dalat" data-origin="TP. Hồ Chí Minh" data-destination="Đà Lạt" type="button"><span class="route-card-overlay"></span><span class="route-card-content"><span class="route-distance">TÂY NGUYÊN · 308 KM</span><strong>TP. Hồ Chí Minh <i>→</i> Đà Lạt</strong><span class="route-card-foot">Lên phố núi nghỉ dưỡng <b>↗</b></span></span></button>
+        <button class="popular-card route-chip-card route-quynhon" data-origin="Đà Nẵng" data-destination="Quy Nhơn" type="button"><span class="route-card-overlay"></span><span class="route-card-content"><span class="route-distance">DUYÊN HẢI · 320 KM</span><strong>Đà Nẵng <i>→</i> Quy Nhơn</strong><span class="route-card-foot">Theo nắng về miền biển <b>↗</b></span></span></button>
+        <button class="popular-card route-chip-card route-hagiang" data-origin="Hà Nội" data-destination="Hà Giang" type="button"><span class="route-card-overlay"></span><span class="route-card-content"><span class="route-distance">MIỀN NÚI · 300 KM</span><strong>Hà Nội <i>→</i> Hà Giang</strong><span class="route-card-foot">Chạm miền đá nở hoa <b>↗</b></span></span></button>
+        <button class="popular-card route-chip-card route-vungtau" data-origin="TP. Hồ Chí Minh" data-destination="Vũng Tàu" type="button"><span class="route-card-overlay"></span><span class="route-card-content"><span class="route-distance">ĐÔNG NAM BỘ · 100 KM</span><strong>TP. Hồ Chí Minh <i>→</i> Vũng Tàu</strong><span class="route-card-foot">Đổi gió cuối tuần <b>↗</b></span></span></button>
+        <button class="popular-card route-chip-card route-halong" data-origin="Hà Nội" data-destination="Hạ Long" type="button"><span class="route-card-overlay"></span><span class="route-card-content"><span class="route-distance">ĐÔNG BẮC · 155 KM</span><strong>Hà Nội <i>→</i> Hạ Long</strong><span class="route-card-foot">Một ngày bên vịnh xanh <b>↗</b></span></span></button>
+      </div>
+    </section>
+
+    <section class="home-banner container">
+      <div><span class="banner-kicker">MỖI CHUYẾN ĐI, THÊM MỘT TRẢI NGHIỆM</span><h2>Đường xa cũng hóa gần<br>khi bạn chọn đúng chuyến.</h2><p>So sánh giờ đi, giá vé và ghế trống để lên kế hoạch thật thoải mái.</p></div>
+      <a class="btn btn-accent" href="pages/trips.html">Khám phá chuyến xe <span>→</span></a>
+      <div class="banner-decoration" aria-hidden="true">B</div>
     </section>
   </main>
 
   <footer id="app-footer"></footer>
-
-  <!-- Thứ tự quan trọng: axios -> config -> api -> utils -> layout -> script riêng của trang -->
   <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/layout.js"></script>
-  <script src="js/pages/home.js"></script>
+  <script src="js/config.js"></script><script src="js/api.js"></script><script src="js/utils.js"></script><script src="js/layout.js"></script><script src="js/pages/home.js"></script>
 </body>
 </html>

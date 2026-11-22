@@ -9,7 +9,7 @@
 const MENU = [
   { href: "index.html", label: "Trang chủ" },
   { href: "pages/trips.html", label: "Tìm chuyến" },
-  { href: "pages/items.html", label: "Items (CRUD mẫu)" },
+  { href: "pages/admin-trips.html", label: "Quản lý chuyến" },
 ];
 
 function renderLayout() {

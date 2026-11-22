@@ -1,21 +1,59 @@
-// Trang chủ: gọi GET /api/health (qua axios trong js/api.js) để kiểm tra FE -> BE -> MySQL đã thông chưa.
+const homeSearchForm = document.getElementById("home-search-form");
+const homeOrigin = document.getElementById("home-origin");
+const homeDestination = document.getElementById("home-destination");
+const homeTravelDate = document.getElementById("home-travel-date");
+const homeSearchFeedback = document.getElementById("home-search-feedback");
 
-async function checkHealth() {
-  const box = document.getElementById("health-status");
-  box.className = "status status-loading";
-  box.textContent = "Đang kiểm tra kết nối...";
-
-  try {
-    const result = await api.get("/health");
-    box.className = "status status-ok";
-    box.textContent = `✅ Backend OK · MySQL: ${result.database}`;
-  } catch (error) {
-    box.className = "status status-error";
-    // 503 = backend chạy nhưng không nối được MySQL; 0 = không gọi được backend
-    box.textContent = `❌ ${error.status === 503 ? "Backend chạy nhưng MySQL lỗi: " + error.data.detail : error.message}`;
-  }
+function localIsoDate(date = new Date()) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
 }
 
-document.getElementById("api-url").textContent = CONFIG.API_BASE_URL;
-document.getElementById("btn-recheck").addEventListener("click", checkHealth);
-checkHealth();
+homeTravelDate.min = localIsoDate();
+homeTravelDate.value = localIsoDate();
+
+document.getElementById("swap-cities").addEventListener("click", () => {
+  const previousOrigin = homeOrigin.value;
+  homeOrigin.value = homeDestination.value;
+  homeDestination.value = previousOrigin;
+});
+
+document.querySelectorAll(".route-chip, .route-chip-card").forEach((route) => {
+  route.addEventListener("click", () => {
+    homeOrigin.value = route.dataset.origin;
+    homeDestination.value = route.dataset.destination;
+    homeTravelDate.focus();
+    document.getElementById("home-search-form").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+});
+
+homeSearchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  homeSearchFeedback.hidden = true;
+  homeSearchFeedback.textContent = "";
+
+  const origin = homeOrigin.value.trim();
+  const destination = homeDestination.value.trim();
+  const travelDate = homeTravelDate.value;
+  if (!origin || !destination || !travelDate) {
+    homeSearchFeedback.textContent = "Vui lòng chọn điểm đi, điểm đến và ngày khởi hành.";
+    homeSearchFeedback.hidden = false;
+    return;
+  }
+  if (origin.localeCompare(destination, "vi", { sensitivity: "base" }) === 0) {
+    homeSearchFeedback.textContent = "Điểm đi và điểm đến cần khác nhau.";
+    homeSearchFeedback.hidden = false;
+    return;
+  }
+  if (travelDate < localIsoDate()) {
+    homeSearchFeedback.textContent = "Ngày khởi hành không thể nằm trong quá khứ.";
+    homeSearchFeedback.hidden = false;
+    homeTravelDate.min = localIsoDate();
+    return;
+  }
+
+  const params = new URLSearchParams({ origin, destination, travel_date: travelDate });
+  const apiOverride = new URLSearchParams(window.location.search).get("api");
+  if (apiOverride) params.set("api", apiOverride);
+  window.location.href = `pages/trips.html?${params.toString()}`;
+});
