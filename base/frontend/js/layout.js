@@ -9,6 +9,9 @@
 const MENU = [
   { href: "index.html", label: "Trang chủ" },
   { href: "pages/items.html", label: "Items (CRUD mẫu)" },
+  { href: "pages/stations-routes.html", label: "Bến xe & Tuyến" },
+  { href: "pages/bus-types.html", label: "Loại xe & Sơ đồ ghế" },
+  { href: "pages/vehicles.html", label: "Phương tiện (xe)" },
 ];
 
 function renderLayout() {
