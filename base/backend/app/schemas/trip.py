@@ -73,6 +73,12 @@ class TripSearchOut(BaseModel):
     available_seats: int
 
 
+class TripDetailOut(TripSearchOut):
+    seat_count: int
+    driver_name: str
+    status: TripStatus
+
+
 class TripConflictOut(BaseModel):
     resource: str
     trip_id: int

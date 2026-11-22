@@ -91,6 +91,55 @@ def search_trips(
     return [dict(row) for row in db.execute(query.order_by(*ordering[sort])).mappings()]
 
 
+def list_trip_options(db: Session) -> dict:
+    return {
+        "routes": [
+            {"id": route.id, "origin": route.origin, "destination": route.destination}
+            for route in db.scalars(select(Route).order_by(Route.origin, Route.destination))
+        ],
+        "buses": [
+            {"id": bus.id, "plate_number": bus.plate_number, "seat_count": bus.seat_count}
+            for bus in db.scalars(select(Bus).where(Bus.is_active.is_(True)).order_by(Bus.plate_number))
+        ],
+        "drivers": [
+            {"id": driver.id, "full_name": driver.full_name}
+            for driver in db.scalars(select(Driver).where(Driver.is_active.is_(True)).order_by(Driver.full_name))
+        ],
+    }
+
+
+def get_trip_details(db: Session, trip_id: int) -> dict | None:
+    confirmed_bookings = (
+        select(func.count(Booking.id))
+        .where(Booking.trip_id == Trip.id, Booking.status == BookingStatus.CONFIRMED)
+        .correlate(Trip)
+        .scalar_subquery()
+    )
+    row = db.execute(
+        select(
+            Trip.id,
+            Trip.route_id,
+            Route.origin,
+            Route.destination,
+            Trip.bus_id,
+            Bus.plate_number,
+            Bus.seat_count,
+            Trip.driver_id,
+            Driver.full_name.label("driver_name"),
+            Trip.departure_at,
+            Trip.arrival_at,
+            Trip.ticket_price,
+            Trip.status,
+            (Bus.seat_count - confirmed_bookings).label("available_seats"),
+        )
+        .join(Route, Trip.route_id == Route.id)
+        .join(Bus, Trip.bus_id == Bus.id)
+        .join(Driver, Trip.driver_id == Driver.id)
+        .where(Trip.id == trip_id)
+    ).mappings().first()
+    return dict(row) if row else None
+
+
 def get_trip(db: Session, trip_id: int) -> Trip | None:
     return db.get(Trip, trip_id)
 

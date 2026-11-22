@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.crud import trip as trip_crud
 from app.db.session import get_db
-from app.schemas.trip import TripCreate, TripOut, TripRepeatOut, TripSearchOut, TripUpdate
+from app.schemas.trip import TripCreate, TripDetailOut, TripOut, TripRepeatOut, TripSearchOut, TripUpdate
 
 router = APIRouter(prefix="/trips", tags=["Trips"])
 
@@ -22,6 +22,12 @@ def get_trip_or_404(trip_id: int, db: Session) -> object:
 @router.get("", response_model=list[TripOut])
 def list_trips(db: Session = Depends(get_db)):
     return trip_crud.list_trips(db)
+
+
+@router.get("/options")
+def list_trip_options(db: Session = Depends(get_db)):
+    """Read-only lookup data for the trip management form."""
+    return trip_crud.list_trip_options(db)
 
 
 @router.get("/search", response_model=list[TripSearchOut])
@@ -53,6 +59,14 @@ def search_trips(
         time_to=time_to,
         sort=sort,
     )
+
+
+@router.get("/{trip_id}/details", response_model=TripDetailOut)
+def get_trip_details(trip_id: int, db: Session = Depends(get_db)):
+    details = trip_crud.get_trip_details(db, trip_id)
+    if details is None:
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy chuyến xe id={trip_id}")
+    return details
 
 
 @router.get("/{trip_id}", response_model=TripOut)

@@ -1,86 +1,49 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f8ff">
   <title>Tìm chuyến xe | BusGo</title>
   <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body data-root="../">
+<body data-root="../" class="results-page">
   <header id="app-header"></header>
+  <main class="container results-main">
+    <nav class="breadcrumbs" aria-label="Điều hướng"><a href="../index.html">Trang chủ</a><span>›</span><span>Tìm chuyến xe</span></nav>
+    <div class="results-title-row"><div><span class="eyebrow">LỰA CHỌN HÀNH TRÌNH</span><h1>Tìm chuyến xe phù hợp</h1><p class="muted">So sánh giờ khởi hành, giá vé và số ghế còn trống.</p></div><a class="back-home-link" href="../index.html">← Sửa hành trình</a></div>
 
-  <main class="container trips-page">
-    <section class="card">
-      <h1>Tìm chuyến xe</h1>
-      <p class="muted">Chọn điểm đi, điểm đến và ngày khởi hành để xem chuyến còn chỗ.</p>
-
+    <section class="card results-search-card">
       <form id="trip-search-form" class="trip-search-form">
         <div class="trip-search-fields">
-          <div>
-            <label for="origin">Điểm đi *</label>
-            <input id="origin" name="origin" type="text" required autocomplete="off" placeholder="Ví dụ: Hà Nội">
-          </div>
-          <div>
-            <label for="destination">Điểm đến *</label>
-            <input id="destination" name="destination" type="text" required autocomplete="off" placeholder="Ví dụ: Đà Nẵng">
-          </div>
-          <div>
-            <label for="travel-date">Ngày khởi hành *</label>
-            <input id="travel-date" name="travel_date" type="date" required>
-          </div>
+          <div class="control-group"><label for="origin">Điểm đi</label><input id="origin" name="origin" type="text" required autocomplete="off" placeholder="Ví dụ: Hà Nội"></div>
+          <div class="control-group"><label for="destination">Điểm đến</label><input id="destination" name="destination" type="text" required autocomplete="off" placeholder="Ví dụ: Đà Nẵng"></div>
+          <div class="control-group"><label for="travel-date">Ngày khởi hành</label><input id="travel-date" name="travel_date" type="date" required></div>
+          <button id="search-submit" class="btn btn-accent search-update-button" type="submit">Tìm chuyến <span aria-hidden="true">⌕</span></button>
         </div>
-
-        <details class="trip-filters">
-          <summary>Bộ lọc nâng cao</summary>
+        <details class="trip-filters" open>
+          <summary><span>♧</span> Lọc chuyến xe <span class="filter-caption">Giá vé · Giờ đi · Sắp xếp</span></summary>
           <div class="trip-search-fields trip-search-fields-optional">
-            <div>
-              <label for="min-price">Giá từ (₫)</label>
-              <input id="min-price" name="min_price" type="number" min="0" step="0.01" inputmode="decimal">
-            </div>
-            <div>
-              <label for="max-price">Giá đến (₫)</label>
-              <input id="max-price" name="max_price" type="number" min="0" step="0.01" inputmode="decimal">
-            </div>
-            <div>
-              <label for="time-from">Khởi hành từ</label>
-              <input id="time-from" name="time_from" type="time">
-            </div>
-            <div>
-              <label for="time-to">Khởi hành đến</label>
-              <input id="time-to" name="time_to" type="time">
-            </div>
-            <div>
-              <label for="sort">Sắp xếp</label>
-              <select id="sort" name="sort">
-                <option value="departure_asc">Giờ khởi hành: sớm nhất</option>
-                <option value="departure_desc">Giờ khởi hành: muộn nhất</option>
-                <option value="price_asc">Giá: thấp đến cao</option>
-                <option value="price_desc">Giá: cao đến thấp</option>
-              </select>
-            </div>
+            <div class="control-group"><label for="min-price">Giá thấp nhất</label><div class="input-suffix"><input id="min-price" name="min_price" type="number" min="0" step="1000" inputmode="numeric" placeholder="Không giới hạn"><span>₫</span></div></div>
+            <div class="control-group"><label for="max-price">Giá cao nhất</label><div class="input-suffix"><input id="max-price" name="max_price" type="number" min="0" step="1000" inputmode="numeric" placeholder="Không giới hạn"><span>₫</span></div></div>
+            <div class="control-group"><label for="time-from">Khởi hành từ</label><input id="time-from" name="time_from" type="time"></div>
+            <div class="control-group"><label for="time-to">Khởi hành đến</label><input id="time-to" name="time_to" type="time"></div>
+            <div class="control-group"><label for="sort">Sắp xếp theo</label><select id="sort" name="sort"><option value="departure_asc">Giờ đi: sớm nhất</option><option value="departure_desc">Giờ đi: muộn nhất</option><option value="price_asc">Giá: thấp đến cao</option><option value="price_desc">Giá: cao đến thấp</option></select></div>
           </div>
         </details>
-
-        <p id="search-feedback" class="text-error" role="alert" hidden></p>
-        <button id="search-submit" class="btn btn-primary" type="submit">Tìm chuyến</button>
+        <p id="search-feedback" class="text-error form-feedback" role="alert" hidden></p>
       </form>
     </section>
 
     <section class="trip-results-section" aria-labelledby="results-heading">
-      <h2 id="results-heading">Chuyến xe phù hợp</h2>
-      <p id="trip-results-status" class="muted" role="status" aria-live="polite">Nhập thông tin chuyến đi để bắt đầu tìm kiếm.</p>
+      <div class="list-header results-list-heading"><div><h2 id="results-heading">Các chuyến xe</h2><p id="trip-results-status" class="muted" role="status" aria-live="polite">Nhập hành trình để xem chuyến còn chỗ.</p></div><span class="result-assurance">✓ Giá vé rõ ràng</span></div>
       <div id="trip-results" class="trip-results"></div>
     </section>
   </main>
-
   <footer id="app-footer"></footer>
-
   <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
-  <script src="../js/config.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/pages/trips.js"></script>
+  <script src="../js/config.js"></script><script src="../js/api.js"></script><script src="../js/utils.js"></script><script src="../js/layout.js"></script><script src="../js/pages/trips.js"></script>
 </body>
 </html>
