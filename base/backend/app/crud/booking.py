@@ -10,7 +10,7 @@ import secrets
 from datetime import datetime
 
 from sqlalchemy import bindparam, text
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 GONE_MESSAGE = "Phiên giữ ghế đã hết hạn hoặc ghế đã bị người khác đặt, hãy chọn lại ghế"
@@ -39,12 +39,34 @@ def generate_booking_code(db: Session) -> str:
 
 def _seat_codes(db: Session, seat_ids: list[int]) -> str:
     rows = db.execute(
-        text("SELECT seat_code FROM seats WHERE seat_id IN :ids ORDER BY seat_id").bindparams(
+        text("SELECT seat_code FROM seats WHERE id IN :ids ORDER BY id").bindparams(
             bindparam("ids", expanding=True)
         ),
         {"ids": list(seat_ids)},
     ).scalars().all()
     return ", ".join(rows)
+
+
+def _route_names(db: Session, trip_id: int) -> tuple[str | None, str | None]:
+    """Tên bến đi/đến của chuyến. Lỗi (thiếu bảng routes/stations) thì trả None, không làm hỏng API."""
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT s1.name AS from_name, s2.name AS to_name
+                FROM trips t
+                JOIN routes r    ON r.id = t.route_id
+                JOIN stations s1 ON s1.id = r.departure_id
+                JOIN stations s2 ON s2.id = r.arrival_id
+                WHERE t.id = :t
+                """
+            ),
+            {"t": trip_id},
+        ).mappings().first()
+    except SQLAlchemyError:
+        db.rollback()
+        return None, None
+    return (row["from_name"], row["to_name"]) if row else (None, None)
 
 
 def booking_info(db: Session, booking_id: int) -> dict:
@@ -61,7 +83,7 @@ def booking_info(db: Session, booking_id: int) -> dict:
             SELECT bd.seat_id, s.seat_code, bd.passenger_name, bd.passenger_phone,
                    bd.pickup, bd.dropoff, bd.hold_until,
                    TIMESTAMPDIFF(SECOND, NOW(), bd.hold_until) AS left_s
-            FROM booking_details bd JOIN seats s ON s.seat_id = bd.seat_id
+            FROM booking_details bd JOIN seats s ON s.id = bd.seat_id
             WHERE bd.booking_id = :b ORDER BY bd.seat_id
             """
         ),
@@ -69,11 +91,27 @@ def booking_info(db: Session, booking_id: int) -> dict:
     ).mappings().all()
     hold_until = min((r["hold_until"] for r in rows if r["hold_until"]), default=None)
     left = min((r["left_s"] for r in rows if r["left_s"] is not None), default=None)
+    departure_time = db.execute(
+        text("SELECT departure_time FROM trips WHERE id = :t"), {"t": head["trip_id"]}
+    ).scalar()
+    from_station, to_station = _route_names(db, head["trip_id"])
+    pay = db.execute(
+        text(
+            "SELECT method, paid_at FROM payments WHERE booking_id = :b "
+            "ORDER BY payment_id DESC LIMIT 1"
+        ),
+        {"b": booking_id},
+    ).mappings().first()
     return {
         "booking_id": head["booking_id"],
         "booking_code": head["booking_code"],
         "status": head["status"],
         "trip_id": head["trip_id"],
+        "departure_time": departure_time,
+        "from_station": from_station,
+        "to_station": to_station,
+        "payment_method": pay["method"] if pay else None,
+        "paid_at": pay["paid_at"] if pay else None,
         "total_price": head["total_price"],
         "pickup": rows[0]["pickup"] if rows else None,
         "dropoff": rows[0]["dropoff"] if rows else None,
@@ -153,7 +191,7 @@ def create_booking(
 
         # 4. Chuyến còn hợp lệ, tính lại tổng tiền ở server
         trip = db.execute(
-            text("SELECT price, (departure_time <= NOW()) AS departed FROM trips WHERE trip_id = :t"),
+            text("SELECT price, (departure_time <= NOW()) AS departed FROM trips WHERE id = :t"),
             {"t": bk["trip_id"]},
         ).mappings().first()
         if trip is None:
@@ -188,4 +226,14 @@ def create_booking(
         db.rollback()
         raise BookingError(409, "Không thể tạo đơn lúc này, hãy chọn lại ghế")
 
+    return booking_info(db, booking_id)
+
+
+def get_booking(db: Session, booking_id: int, user_id: str) -> dict:
+    """Xem 1 đơn của chính mình (trang thanh toán, trang xác nhận)."""
+    owner = db.execute(
+        text("SELECT user_id FROM bookings WHERE booking_id = :b"), {"b": booking_id}
+    ).scalar()
+    if owner is None or owner != user_id:
+        raise BookingError(404, "Không tìm thấy đơn đặt vé")
     return booking_info(db, booking_id)

@@ -1,4 +1,6 @@
-"""Schema cho API sơ đồ ghế theo chuyến."""
+"""Schema cho API sơ đồ ghế theo chuyến.
+"""
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel
@@ -23,6 +25,8 @@ class SeatMapOut(BaseModel):
     floors: int
     rows_per_floor: int
     cols_per_floor: int
+    price: float | None = None  # giá vé 1 ghế, FE dùng để tính tổng tiền
+    departure_time: datetime | None = None
     total_seats: int
     available_count: int
-    seats: list[SeatOut]  
+    seats: list[SeatOut]  # đã sắp theo tầng -> hàng -> cột để FE vẽ lưới

@@ -39,6 +39,11 @@ class BookingOut(BaseModel):
     booking_code: str
     status: str
     trip_id: int
+    departure_time: datetime | None = None
+    from_station: str | None = None
+    to_station: str | None = None
+    payment_method: str | None = None  # có khi đã thanh toán
+    paid_at: datetime | None = None
     total_price: float
     pickup: str | None
     dropoff: str | None

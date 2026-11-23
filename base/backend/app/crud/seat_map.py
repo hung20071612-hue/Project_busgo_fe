@@ -1,4 +1,9 @@
-"""Truy vấn sơ đồ ghế của 1 chuyến."""
+"""Truy vấn sơ đồ ghế của 1 chuyến.
+
+Dùng SQL thuần (text) theo tên bảng/cột trong ERD chung nên không phụ thuộc
+tên class model của các bạn khác. Cần các bảng: trips, buses, bus_types, seats,
+bookings, booking_details.
+"""
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -9,12 +14,12 @@ def get_seat_map(db: Session, trip_id: int) -> dict | None:
     layout = db.execute(
         text(
             """
-            SELECT t.trip_id, bt.bus_type_id, bt.name, bt.floors,
+            SELECT t.id AS trip_id, t.price, t.departure_time, bt.id AS bus_type_id, bt.name, bt.floors,
                    bt.rows_per_floor, bt.cols_per_floor
             FROM trips t
-            JOIN buses b       ON b.bus_id = t.bus_id
-            JOIN bus_types bt  ON bt.bus_type_id = b.bus_type_id
-            WHERE t.trip_id = :trip_id
+            JOIN buses b       ON b.id = t.bus_id
+            JOIN bus_types bt  ON bt.id = b.bus_type_id
+            WHERE t.id = :trip_id
             """
         ),
         {"trip_id": trip_id},
@@ -26,7 +31,7 @@ def get_seat_map(db: Session, trip_id: int) -> dict | None:
     seats = db.execute(
         text(
             """
-            SELECT seat_id, seat_code, floor, row_num, col_num, seat_type
+            SELECT id AS seat_id, seat_code, floor, row_num, col_num, seat_type
             FROM seats
             WHERE bus_type_id = :bus_type_id AND is_active = 1
             ORDER BY floor, row_num, col_num
@@ -89,6 +94,8 @@ def get_seat_map(db: Session, trip_id: int) -> dict | None:
         "floors": layout["floors"],
         "rows_per_floor": layout["rows_per_floor"],
         "cols_per_floor": layout["cols_per_floor"],
+        "price": layout["price"],
+        "departure_time": layout["departure_time"],
         "total_seats": len(result_seats),
         "available_count": available,
         "seats": result_seats,

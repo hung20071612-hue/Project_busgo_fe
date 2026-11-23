@@ -37,7 +37,7 @@ class Booking(Base):
     booking_code: Mapped[str] = mapped_column(String(20), unique=True)
     # Kieu String(5) khop voi user.id trong ERD chung; doi thanh int neu nhom doi user.id sang INT
     user_id: Mapped[str] = mapped_column(String(5), ForeignKey("user.id"), index=True)
-    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.trip_id"), index=True)
+    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), index=True)
     total_price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     status: Mapped[BookingStatus] = mapped_column(
         Enum(BookingStatus), default=BookingStatus.PENDING_PAYMENT, index=True
@@ -66,8 +66,8 @@ class BookingDetail(Base):
     booking_id: Mapped[int] = mapped_column(
         ForeignKey("bookings.booking_id", ondelete="CASCADE"), index=True
     )
-    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.trip_id"))
-    seat_id: Mapped[int] = mapped_column(ForeignKey("seats.seat_id"))
+    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"))
+    seat_id: Mapped[int] = mapped_column(ForeignKey("seats.id"))
     passenger_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     passenger_phone: Mapped[str | None] = mapped_column(String(15), nullable=True)
     pickup: Mapped[str | None] = mapped_column(String(255), nullable=True)

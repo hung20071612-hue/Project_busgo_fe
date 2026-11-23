@@ -1,5 +1,6 @@
 """API giữ ghế tạm 10 phút.
 
+    GET    /api/holds/{booking_id}                    xem lại phiên giữ ghế (khi tải lại trang)
     POST   /api/trips/{trip_id}/holds                 giữ 1-5 ghế (hoặc thêm ghế vào phiên cũ)
     DELETE /api/holds/{booking_id}/seats/{seat_id}    bỏ chọn 1 ghế (nhả ghế)
     DELETE /api/holds/{booking_id}                    nhả toàn bộ phiên giữ
@@ -24,6 +25,18 @@ def _raise(error: hold_crud.HoldError):
 def hold_seats(trip_id: int, data: SeatHoldIn, db: Session = Depends(get_db)):
     try:
         return hold_crud.hold_seats(db, trip_id, data.user_id, data.seat_ids, data.booking_id)
+    except hold_crud.HoldError as error:
+        _raise(error)
+
+
+@router.get("/holds/{booking_id}", response_model=SeatHoldOut)
+def get_hold(
+    booking_id: int,
+    user_id: str = Query(min_length=1, max_length=5),  # TẠM, thay bằng user từ JWT
+    db: Session = Depends(get_db),
+):
+    try:
+        return hold_crud.get_hold(db, booking_id, user_id)
     except hold_crud.HoldError as error:
         _raise(error)
 

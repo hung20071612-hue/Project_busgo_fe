@@ -106,9 +106,9 @@ def hold_seats(
     trip = db.execute(
         text(
             """
-            SELECT t.trip_id, t.price, b.bus_type_id, (t.departure_time <= NOW()) AS departed
-            FROM trips t JOIN buses b ON b.bus_id = t.bus_id
-            WHERE t.trip_id = :t
+            SELECT t.id AS trip_id, t.price, b.bus_type_id, (t.departure_time <= NOW()) AS departed
+            FROM trips t JOIN buses b ON b.id = t.bus_id
+            WHERE t.id = :t
             """
         ),
         {"t": trip_id},
@@ -124,8 +124,8 @@ def hold_seats(
     # Ghế phải thuộc xe của chuyến này
     valid = db.execute(
         _in(
-            "SELECT seat_id, seat_code FROM seats "
-            "WHERE bus_type_id = :bt AND is_active = 1 AND seat_id IN :ids",
+            "SELECT id AS seat_id, seat_code FROM seats "
+            "WHERE bus_type_id = :bt AND is_active = 1 AND id IN :ids",
             "ids",
         ),
         {"bt": trip["bus_type_id"], "ids": seat_ids},
@@ -277,11 +277,30 @@ def release_seats(
         }
 
     price = db.execute(
-        text("SELECT price FROM trips WHERE trip_id = :t"), {"t": bk["trip_id"]}
+        text("SELECT price FROM trips WHERE id = :t"), {"t": bk["trip_id"]}
     ).scalar()
     db.execute(
         text("UPDATE bookings SET total_price = :p WHERE booking_id = :b"),
         {"p": price * remaining, "b": booking_id},
     )
     db.commit()
+    return _hold_info(db, booking_id)
+
+
+def get_hold(db: Session, booking_id: int, user_id: str) -> dict:
+    """Lấy lại phiên giữ ghế đang còn hạn (FE dùng khi tải lại trang)."""
+    bk = db.execute(
+        text("SELECT user_id, status FROM bookings WHERE booking_id = :b"), {"b": booking_id}
+    ).mappings().first()
+    if bk is None or bk["user_id"] != user_id or bk["status"] != "PENDING_PAYMENT":
+        raise HoldError(404, "Không tìm thấy phiên giữ ghế")
+    valid = db.execute(
+        text(
+            "SELECT COUNT(*) FROM booking_details "
+            "WHERE booking_id = :b AND (hold_until IS NULL OR hold_until > NOW())"
+        ),
+        {"b": booking_id},
+    ).scalar()
+    if not valid:
+        raise HoldError(404, "Phiên giữ ghế đã hết hạn")
     return _hold_info(db, booking_id)
