@@ -1,3 +1,4 @@
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -21,10 +22,13 @@ def get_station_or_404(station_id: int, db: Session = Depends(get_db)):
 def list_stations(
     q: str | None = None,
     active_only: bool = False,
+    status: Literal["active", "inactive"] | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(RoleCheck(["ADMIN"])),
 ):
-    return station_crud.get_stations(db, keyword=q, active_only=active_only)
+    return station_crud.get_stations(
+        db, keyword=q, active_only=active_only, status=status
+    )
 
 
 @router.get("/{station_id}", response_model=StationOut)

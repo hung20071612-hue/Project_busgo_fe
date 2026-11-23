@@ -1,18 +1,36 @@
-from sqlalchemy import select, and_
-from sqlalchemy.orm import Session
+from sqlalchemy import select, and_, or_
+from sqlalchemy.orm import Session, aliased
 from fastapi import HTTPException
 
 from app.models.route import Route
+from app.models.station import Station
 from app.models.trip import Trip
 from app.schemas.route import RouteCreate, RouteUpdate
 
 
-def get_routes(db: Session, keyword: str | None = None, active_only: bool = False):
+def get_routes(
+    db: Session,
+    keyword: str | None = None,
+    active_only: bool = False,
+    status: str | None = None,
+):
     query = select(Route).order_by(Route.id.desc())
     if keyword:
-        query = query.where(Route.code.contains(keyword))
+        departure = aliased(Station)
+        arrival = aliased(Station)
+        query = query.join(departure, Route.departure_id == departure.id).join(
+            arrival, Route.arrival_id == arrival.id
+        ).where(
+            or_(
+                Route.code.contains(keyword),
+                departure.name.contains(keyword),
+                arrival.name.contains(keyword),
+            )
+        )
     if active_only:
         query = query.where(Route.is_active == True)
+    if status:
+        query = query.where(Route.is_active == (status == "active"))
     return list(db.scalars(query))
 
 

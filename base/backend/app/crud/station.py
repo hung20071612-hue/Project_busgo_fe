@@ -7,12 +7,26 @@ from app.models.trip import Trip
 from app.schemas.station import StationCreate, StationUpdate
 
 
-def get_stations(db: Session, keyword: str | None = None, active_only: bool = False):
+def get_stations(
+    db: Session,
+    keyword: str | None = None,
+    active_only: bool = False,
+    status: str | None = None,
+):
     query = select(Station).order_by(Station.id.desc())
     if keyword:
-        query = query.where(Station.name.contains(keyword))
+        query = query.where(
+            or_(
+                Station.name.contains(keyword),
+                Station.city.contains(keyword),
+                Station.address.contains(keyword),
+                Station.phone.contains(keyword),
+            )
+        )
     if active_only:
         query = query.where(Station.is_active == True)
+    if status:
+        query = query.where(Station.is_active == (status == "active"))
     return list(db.scalars(query))
 
 
