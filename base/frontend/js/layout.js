@@ -12,6 +12,7 @@ const MENU = [
   { href: "pages/my-bookings.html", label: "Vé của tôi" },
   { href: "pages/booking-lookup.html", label: "Tra cứu vé" },
   { href: "pages/staff-passengers.html", label: "Danh sách hành khách và soát vé" },
+  { href: "pages/statistics.html", label: "Thống kê vé và doanh thu" },
 ];
 
 function renderLayout() {
