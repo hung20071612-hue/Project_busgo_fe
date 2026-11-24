@@ -25,6 +25,7 @@ from app.routers import (
     trip_seats,
     trips,
     user,
+    admin_users
 )
 
 
@@ -65,6 +66,7 @@ app.include_router(trips.router, prefix="/api")
 app.include_router(trip_seats.router, prefix="/api")
 app.include_router(stations.router, prefix="/api/admin")
 app.include_router(routes.router, prefix="/api/admin")
+app.include_router(admin_users.router, prefix="/api/admin")
 
 
 @app.get("/")
