@@ -1,8 +1,3 @@
-"""Điểm khởi động của backend.
-
-Chạy:  uvicorn app.main:app --reload
-Tài liệu API tự sinh: http://127.0.0.1:8000/docs
-"""
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -11,11 +6,33 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.exc import OperationalError
 
-from app import models  # noqa: F401 - import để SQLAlchemy biết các bảng
+from app import models
 from app.core.config import settings
 from app.core.exceptions import global_exception_handler
 from app.db.session import Base, engine
+<<<<<<< Updated upstream
 from app.routers import auth_router, check_bookings, health, routes, stations, trips, user
+=======
+from app.routers import (
+    admin_users,
+    auth_router,
+    bookings,
+    bus_types,
+    buses,
+    cancel_booking,
+    check_bookings,
+    driver,
+    health,
+    payments,
+    routes,
+    seat_hold,
+    stations,
+    statistics,
+    trip_seats,
+    trips,
+    user,
+)
+>>>>>>> Stashed changes
 
 
 @asynccontextmanager
@@ -40,7 +57,6 @@ app.state.limiter = auth_router.limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 
-# CORS: cho phép trang FE (khác cổng/khác domain) gọi được API này
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -48,14 +64,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mọi API đều bắt đầu bằng /api. Thêm router mới thì include ở đây.
 app.include_router(health.router, prefix="/api")
 app.include_router(auth_router.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
+app.include_router(seat_hold.router, prefix="/api")
+app.include_router(bookings.router, prefix="/api")
+app.include_router(cancel_booking.router, prefix="/api")
 app.include_router(check_bookings.router, prefix="/api")
+app.include_router(payments.router, prefix="/api")
 app.include_router(trips.router, prefix="/api")
 app.include_router(stations.router, prefix="/api/admin")
 app.include_router(routes.router, prefix="/api/admin")
+<<<<<<< Updated upstream
+=======
+app.include_router(buses.router, prefix="/api/admin")
+app.include_router(bus_types.router, prefix="/api/admin")
+app.include_router(driver.router, prefix="/api/admin")
+app.include_router(admin_users.router, prefix="/api/admin")
+app.include_router(statistics.router, prefix="/api/admin")
+>>>>>>> Stashed changes
 
 
 @app.get("/")

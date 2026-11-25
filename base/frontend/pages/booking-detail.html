@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết vé | BusGo</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../">
+
+    <header id="app-header"></header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Chi tiết vé</h2>
+
+            <div id="booking-info">
+                Đang tải thông tin vé...
+            </div>
+
+            <h3>Thông tin hành khách</h3>
+            <div id="booking-details"></div>
+
+            <div class="form-actions">
+                <button id="btn-cancel-booking" class="btn btn-primary" hidden>
+                    Huỷ vé
+                </button>
+                <a href="my-bookings.html" class="btn">
+                    Quay lại
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer id="app-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/layout.js"></script>
+    <script src="../js/pages/booking-detail.js"></script>
+
+</body>
+</html>

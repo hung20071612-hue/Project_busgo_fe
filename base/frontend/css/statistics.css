@@ -1,0 +1,102 @@
+
+.statistics-page {
+    padding-top: 30px;
+    padding-bottom: 40px;
+}
+
+.statistics-heading {
+    margin-bottom: 25px;
+}
+
+.statistics-heading h1 {
+    margin-bottom: 5px;
+    color: #1e293b;
+}
+
+.statistics-heading p {
+    color: #64748b;
+}
+
+/* Bộ lọc ngày */
+.filter-section h2 {
+    font-size: 18px;
+}
+
+.filter-controls {
+    display: flex;
+    align-items: end;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-controls > div {
+    flex: 1;
+    min-width: 180px;
+}
+
+.filter-controls label {
+    margin-top: 0;
+}
+
+.filter-controls button {
+    min-height: 40px;
+}
+
+.error-message {
+    color: #dc2626;
+    margin-top: 10px;
+}
+
+/* Hai thẻ thống kê */
+.statistics-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.statistic-card {
+    border-left: 5px solid #2563eb;
+}
+
+.statistic-card h3 {
+    color: #64748b;
+    font-size: 15px;
+    margin-top: 0;
+}
+
+.statistic-card p {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1e40af;
+    margin-bottom: 0;
+}
+
+/* Biểu đồ */
+.chart-section h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.chart-section canvas {
+    width: 100% !important;
+    max-height: 350px;
+}
+
+@media (max-width: 600px) {
+    .statistics-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-controls > div {
+        width: 100%;
+    }
+
+    .statistic-card p {
+        font-size: 24px;
+    }
+}

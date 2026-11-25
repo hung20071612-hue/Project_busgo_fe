@@ -1,0 +1,41 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vé của tôi | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Vé của tôi</h2>
+      <p>Quản lý các vé xe đã đặt của bạn.</p>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" data-status="all">Tất cả</button>
+        <button class="btn" data-status="PAID">Đã thanh toán</button>
+        <button class="btn" data-status="PENDING_PAYMENT">Chờ thanh toán</button>
+        <button class="btn" data-status="CANCELLED">Đã huỷ</button>      </div>
+
+      <div id="booking-list">
+        <p>Đang tải danh sách vé...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/my-bookings.js"></script>
+</body>
+</html>
+```

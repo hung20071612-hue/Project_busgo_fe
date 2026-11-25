@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#f5f8ff">
+  <title>Quản lý chuyến xe | BusGo</title><link rel="icon" href="../assets/images/logo.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" class="admin-trips-page">
+  <header id="app-header"></header>
+  <main class="container admin-main">
+    <nav class="breadcrumbs" aria-label="Điều hướng"><a href="../index.html">Trang chủ</a><span>›</span><span>Quản lý chuyến xe</span></nav>
+    <div class="admin-heading"><div><span class="eyebrow">ĐIỀU HÀNH BUSGO</span><h1>Quản lý chuyến xe</h1><p class="muted">Theo dõi lịch trình và tạo chuyến mới cho đội xe của bạn.</p></div><button type="button" class="btn btn-accent" id="focus-create">＋ Tạo chuyến mới</button></div>
+    <div id="admin-page-message" class="status status-loading" role="status">Đang tải dữ liệu tuyến, xe và tài xế…</div>
+
+    <section class="card admin-form-card" id="create-trip-section">
+      <div class="section-heading"><div><span class="eyebrow">LỊCH TRÌNH MỚI</span><h2>Tạo chuyến xe</h2><p class="muted">Chọn tuyến, phương tiện và tài xế. Hệ thống sẽ kiểm tra lịch trùng trước khi lưu.</p></div><span class="form-required-note">* Thông tin bắt buộc</span></div>
+      <form id="admin-trip-form" novalidate>
+        <div class="admin-form-grid">
+          <div class="control-group admin-wide"><label for="admin-route">Tuyến đường <span>*</span></label><select id="admin-route" name="route_id" required><option value="">Đang tải tuyến đường…</option></select></div>
+          <div class="control-group"><label for="admin-departure">Giờ khởi hành <span>*</span></label><input id="admin-departure" name="departure_at" type="datetime-local" required></div>
+          <div class="control-group"><label for="admin-arrival">Giờ đến dự kiến <span>*</span></label><input id="admin-arrival" name="arrival_at" type="datetime-local" required></div>
+          <div class="control-group"><label for="admin-bus">Phương tiện <span>*</span></label><select id="admin-bus" name="bus_id" required><option value="">Đang tải phương tiện…</option></select><small id="bus-seat-hint" class="field-hint"></small></div>
+          <div class="control-group"><label for="admin-driver">Tài xế phụ trách <span>*</span></label><select id="admin-driver" name="driver_id" required><option value="">Đang tải tài xế…</option></select></div>
+          <div class="control-group"><label for="admin-price">Giá vé (₫) <span>*</span></label><div class="input-suffix"><input id="admin-price" name="ticket_price" type="number" min="1" step="1000" required placeholder="Ví dụ: 250000"><span>₫</span></div></div>
+          <div class="control-group"><label for="admin-repeat">Lịch lặp</label><select id="admin-repeat" name="repeat"><option value="once">Chỉ tạo chuyến này</option><option value="daily">Lặp mỗi ngày trong 7 ngày</option></select></div>
+        </div>
+        <div id="conflict-alert" class="conflict-alert" role="alert" hidden><span class="conflict-symbol">!</span><div><strong>Có lịch trình bị trùng</strong><p id="conflict-message"></p></div></div>
+        <p id="admin-form-feedback" class="form-feedback text-error" role="alert" hidden></p>
+        <div class="form-actions admin-form-actions"><button type="reset" class="btn btn-quiet">Xóa nội dung</button><button id="admin-submit" type="submit" class="btn btn-accent">Lưu chuyến xe <span aria-hidden="true">→</span></button></div>
+      </form>
+    </section>
+
+    <section class="card schedule-card">
+      <div class="section-heading schedule-heading"><div><span class="eyebrow">ĐỘI XE CỦA BẠN</span><h2>Lịch trình chuyến xe</h2><p id="trip-list-status" class="muted" role="status" aria-live="polite">Đang tải danh sách chuyến…</p></div><button type="button" id="refresh-trips" class="btn btn-outline">↻ Làm mới</button></div>
+      <div class="schedule-filters"><div class="control-group"><label for="filter-date">Lọc theo ngày</label><input id="filter-date" type="date"></div><div class="control-group"><label for="filter-route">Lọc theo tuyến</label><select id="filter-route"><option value="">Tất cả tuyến</option></select></div></div>
+      <div id="admin-trip-list" class="admin-trip-list"></div>
+    </section>
+  </main>
+  <footer id="app-footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script><script src="../js/config.js"></script><script src="../js/api.js"></script><script src="../js/utils.js"></script><script src="../js/layout.js"></script><script src="../js/pages/admin-trips.js"></script>
+</body>
+</html>
