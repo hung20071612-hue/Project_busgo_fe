@@ -1,9 +1,11 @@
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Booking, Bus, Driver, Route, Trip, TripStatus
+from app.models.booking import BookingStatus, Payment, PaymentStatus
 from app.models.bus import BusStatusEnum
 from app.models.driver import DriverStatusEnum
 from app.schemas.trip import TripCreate, TripUpdate
@@ -26,13 +28,18 @@ def validate_references(
     arrival_at: datetime | None = None,
     exclude_trip_id: int | None = None,
 ) -> str | None:
-    if db.get(Route, route_id) is None:
+    route = db.get(Route, route_id)
+    if route is None:
         return f"Không tìm thấy tuyến đường id={route_id}"
+    if not route.is_active:
+        return f"Tuyến đường id={route_id} hiện không hoạt động"
+
     bus = db.get(Bus, bus_id)
     if bus is None:
         return f"Không tìm thấy xe id={bus_id}"
     if bus.status != BusStatusEnum.active:
         return f"Xe id={bus_id} hiện không hoạt động"
+
     driver = db.get(Driver, driver_id)
     if driver is None:
         return f"Không tìm thấy tài xế id={driver_id}"
@@ -75,8 +82,37 @@ def update_trip(db: Session, trip: Trip, data: TripUpdate) -> Trip:
     changes = data.model_dump(exclude_unset=True, exclude={"status"})
     for field, value in changes.items():
         setattr(trip, field, value)
-    if data.status == TripStatus.CANCELLED:
+
+    if data.status == TripStatus.CANCELLED and trip.status != TripStatus.CANCELLED:
         trip.status = TripStatus.CANCELLED
+        now = db.scalar(select(func.now()))
+        active_bookings = list(
+            db.scalars(
+                select(Booking).where(
+                    Booking.trip_id == trip.id,
+                    Booking.status.in_([BookingStatus.PENDING_PAYMENT, BookingStatus.PAID]),
+                )
+            )
+        )
+        for booking in active_bookings:
+            if booking.status == BookingStatus.PAID:
+                booking.refund_amount = booking.total_price
+                payments = list(
+                    db.scalars(
+                        select(Payment).where(
+                            Payment.booking_id == booking.booking_id,
+                            Payment.status == PaymentStatus.SUCCESS,
+                        )
+                    )
+                )
+                for payment in payments:
+                    payment.status = PaymentStatus.REFUNDED
+            else:
+                booking.refund_amount = Decimal("0")
+
+            booking.status = BookingStatus.CANCELLED
+            booking.cancelled_at = now
+
     db.commit()
     db.refresh(trip)
     return trip

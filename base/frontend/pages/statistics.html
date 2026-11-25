@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê vé và doanh thu</title>
+
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/statistics.css">
+</head>
+
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container statistics-page">
+
+    <section class="statistics-heading">
+      <h1>Thống kê vé và doanh thu</h1>
+      <p>Theo dõi tình hình bán vé và doanh thu của hệ thống</p>
+    </section>
+
+    <!-- Bộ lọc thời gian -->
+    <section class="card filter-section">
+      <h2>Chọn khoảng thời gian</h2>
+
+      <div class="filter-controls">
+        <div>
+          <label for="start-date">Từ ngày</label>
+          <input type="date" id="start-date">
+        </div>
+
+        <div>
+          <label for="end-date">Đến ngày</label>
+          <input type="date" id="end-date">
+        </div>
+
+        <button id="btn-filter" class="btn btn-primary">
+          Lọc dữ liệu
+        </button>
+      </div>
+
+      <p id="filter-error" class="error-message"></p>
+    </section>
+
+    <!-- Hai thẻ thống kê -->
+    <section class="statistics-cards">
+
+      <div class="card statistic-card">
+        <h3>Tổng số vé đã bán</h3>
+        <p id="total-tickets">Đang tải...</p>
+      </div>
+
+      <div class="card statistic-card">
+        <h3>Tổng doanh thu</h3>
+        <p id="total-revenue">Đang tải...</p>
+      </div>
+
+    </section>
+
+    <!-- Biểu đồ doanh thu -->
+    <section class="card chart-section">
+      <h2>Doanh thu theo ngày</h2>
+      <div id="revenue-loading">Đang tải dữ liệu...</div>
+      <div id="revenue-error" class="error-message"></div>
+      <canvas id="revenue-chart"></canvas>
+    </section>
+
+    <!-- Biểu đồ top tuyến -->
+    <section class="card chart-section">
+      <h2>Top tuyến theo số vé bán</h2>
+      <div id="routes-loading">Đang tải dữ liệu...</div>
+      <div id="routes-error" class="error-message"></div>
+      <canvas id="routes-chart"></canvas>
+    </section>
+
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/statistics.js"></script>
+</body>
+</html>

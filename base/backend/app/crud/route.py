@@ -1,8 +1,9 @@
-from sqlalchemy import select, and_
-from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from sqlalchemy import and_, select
+from sqlalchemy.orm import Session
 
 from app.models.route import Route
+from app.models.station import Station
 from app.models.trip import Trip
 from app.schemas.route import RouteCreate, RouteUpdate
 
@@ -21,11 +22,19 @@ def get_route(db: Session, route_id: int) -> Route | None:
 
 
 def create_route(db: Session, data: RouteCreate) -> Route:
-    # Điểm đi ≠ điểm đến
     if data.departure_id == data.arrival_id:
         raise HTTPException(status_code=400, detail="Điểm đi và điểm đến không được trùng nhau")
 
-    # Không trùng tuyến
+    if db.scalar(select(Route).where(Route.code == data.code)):
+        raise HTTPException(status_code=400, detail="Mã tuyến đã tồn tại")
+
+    dep = db.get(Station, data.departure_id)
+    arr = db.get(Station, data.arrival_id)
+    if not dep or not arr:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bến đi hoặc bến đến")
+    if not dep.is_active or not arr.is_active:
+        raise HTTPException(status_code=400, detail="Bến đi hoặc bến đến đã ngừng hoạt động")
+
     existing = db.scalar(
         select(Route).where(
             and_(
@@ -47,11 +56,29 @@ def create_route(db: Session, data: RouteCreate) -> Route:
 def update_route(db: Session, route: Route, data: RouteUpdate) -> Route:
     update_data = data.model_dump(exclude_unset=True)
 
+    if "code" in update_data:
+        existing_code = db.scalar(
+            select(Route).where(
+                Route.code == update_data["code"],
+                Route.id != route.id,
+            )
+        )
+        if existing_code:
+            raise HTTPException(status_code=400, detail="Mã tuyến đã tồn tại")
+
     new_departure = update_data.get("departure_id", route.departure_id)
     new_arrival = update_data.get("arrival_id", route.arrival_id)
 
     if new_departure == new_arrival:
         raise HTTPException(status_code=400, detail="Điểm đi và điểm đến không được trùng nhau")
+
+    if "departure_id" in update_data or "arrival_id" in update_data:
+        dep = db.get(Station, new_departure)
+        arr = db.get(Station, new_arrival)
+        if not dep or not arr:
+            raise HTTPException(status_code=404, detail="Không tìm thấy bến đi hoặc bến đến")
+        if not dep.is_active or not arr.is_active:
+            raise HTTPException(status_code=400, detail="Bến đi hoặc bến đến đã ngừng hoạt động")
 
     existing = db.scalar(
         select(Route).where(
@@ -74,7 +101,6 @@ def update_route(db: Session, route: Route, data: RouteUpdate) -> Route:
 
 
 def delete_route(db: Session, route: Route) -> dict:
-    """Tuyến đã có chuyến → ngừng hoạt động; chưa có → xóa cứng"""
     has_trips = db.scalar(
         select(Trip.id).where(Trip.route_id == route.id).limit(1)
     )
@@ -84,7 +110,7 @@ def delete_route(db: Session, route: Route) -> dict:
         db.commit()
         return {
             "action": "deactivated",
-            "message": "Tuyến đã có chuyến, đã chuyển sang ngừng hoạt động"
+            "message": "Tuyến đã có chuyến, đã chuyển sang ngừng hoạt động",
         }
 
     db.delete(route)

@@ -1,9 +1,8 @@
-from sqlalchemy import select, or_
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app.models.station import Station
-from app.models.trip import Trip
 from app.models.route import Route
+from app.models.station import Station
 from app.schemas.station import StationCreate, StationUpdate
 
 
@@ -37,10 +36,8 @@ def update_station(db: Session, station: Station, data: StationUpdate) -> Statio
 
 
 def delete_station(db: Session, station: Station) -> dict:
-    """Bến đã có chuyến → ngừng hoạt động; chưa có → xóa cứng"""
-    has_trips = db.scalar(
-        select(Trip.id)
-        .join(Route, Trip.route_id == Route.id)
+    has_routes = db.scalar(
+        select(Route.id)
         .where(
             or_(
                 Route.departure_id == station.id,
@@ -50,12 +47,12 @@ def delete_station(db: Session, station: Station) -> dict:
         .limit(1)
     )
 
-    if has_trips:
+    if has_routes:
         station.is_active = False
         db.commit()
         return {
             "action": "deactivated",
-            "message": "Bến đã có chuyến, đã chuyển sang ngừng hoạt động"
+            "message": "Bến đã được gắn vào tuyến đường, đã chuyển sang ngừng hoạt động",
         }
 
     db.delete(station)

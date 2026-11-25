@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phương tiện & Sơ đồ ghế | BusGo Admin</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/vehicles.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <section class="card">
+      <h1>Quản lý phương tiện (xe)</h1>
+      <p class="muted">Biển số không trùng · trạng thái · xem sơ đồ ghế theo loại xe. Cần Admin.</p>
+
+      <div class="layout-split">
+        <div>
+          <h2 id="form-title">Thêm xe mới</h2>
+          <form id="bus-form">
+            <label>Biển số *</label>
+            <input name="plate_number" required maxlength="20" placeholder="29B-12345">
+
+            <label>Loại xe *</label>
+            <select name="bus_type_id" id="bus-type-select" required>
+              <option value="">-- Chọn loại xe --</option>
+            </select>
+
+            <label>Trạng thái</label>
+            <select name="status">
+              <option value="active">Hoạt động</option>
+              <option value="maintenance">Bảo dưỡng</option>
+              <option value="retired">Ngừng sử dụng</option>
+            </select>
+
+            <label>Ghi chú</label>
+            <input name="note" maxlength="255">
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-submit">Thêm</button>
+              <button type="button" class="btn" id="btn-cancel" hidden>Huỷ</button>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <div class="list-header">
+            <h2>Danh sách xe</h2>
+            <div class="filters">
+              <input id="search-input" type="search" placeholder="Tìm biển số...">
+              <select id="status-filter">
+                <option value="">Tất cả TT</option>
+                <option value="active">Hoạt động</option>
+                <option value="maintenance">Bảo dưỡng</option>
+                <option value="retired">Ngừng</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Biển số</th>
+                  <th>Loại xe</th>
+                  <th>TT</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pager"></div>
+
+          <div id="seat-preview" class="seat-preview" hidden>
+            <div class="list-header">
+              <h2 id="seat-title">Sơ đồ ghế loại xe</h2>
+              <button type="button" class="btn btn-small" id="seat-close">Đóng</button>
+            </div>
+            <div id="seat-map" class="seat-map"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="modal">
+      <h3 id="confirm-title">Xác nhận</h3>
+      <p id="confirm-message" class="muted"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="confirm-cancel">Huỷ</button>
+        <button type="button" class="btn btn-danger-solid" id="confirm-ok">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/vehicles.js"></script>
+</body>
+</html>
