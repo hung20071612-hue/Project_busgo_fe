@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang chủ | KS25 Base</title>
+  <title>Trang chủ | BusGo - Đặt vé xe khách trực tuyến</title>
   <link rel="icon" href="assets/images/logo.svg">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,33 +11,101 @@
   <header id="app-header"></header>
 
   <main class="container">
-    <section class="card">
-      <h1>Base code Frontend (HTML · CSS · JS)</h1>
-      <p>Khung dự án cho các nhóm thực tập. Trang này kiểm tra kết nối <strong>Frontend → Backend → MySQL</strong>.</p>
+    <!-- Hero Banner + Form tìm chuyến nhanh -->
+    <section class="hero-banner">
+      <div class="hero-top">
+        <div>
+          <h1>Đặt vé xe khách nhanh chóng, giữ ghế tức thì</h1>
+          <p>Hàng trăm tuyến xe chất lượng cao kết nối các tỉnh thành. Chọn ghế trực quan trên sơ đồ 2 tầng và nhận vé điện tử ngay sau khi thanh toán.</p>
+        </div>
+        <div class="health-pill" id="backend-health" title="Trạng thái kết nối API Backend">
+          <span class="health-dot" id="health-dot"></span>
+          <span id="health-text">Đang kiểm tra API...</span>
+        </div>
+      </div>
 
-      <p>API đang dùng: <code id="api-url"></code> <span class="muted">(sửa trong <code>js/config.js</code>)</span></p>
-      <div id="health-status" class="status"></div>
-      <button id="btn-recheck" class="btn">Kiểm tra lại</button>
+      <form id="quick-search-form" class="search-box">
+        <div class="search-grid">
+          <div>
+            <label for="departure-input">Điểm đi</label>
+            <input
+              type="text"
+              id="departure-input"
+              list="stations-datalist"
+              placeholder="Chọn bến xe / tỉnh đi (VD: Hà Nội)"
+              required
+            >
+          </div>
+
+          <button type="button" id="btn-swap-stations" class="btn-swap" title="Đổi điểm đi và điểm đến">
+            ⇄
+          </button>
+
+          <div>
+            <label for="arrival-input">Điểm đến</label>
+            <input
+              type="text"
+              id="arrival-input"
+              list="stations-datalist"
+              placeholder="Chọn bến xe / tỉnh đến (VD: Đà Nẵng)"
+              required
+            >
+          </div>
+
+          <div>
+            <label for="departure-date">Ngày khởi hành</label>
+            <input type="date" id="departure-date" required>
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-accent btn-block" style="height: 41px;">
+              Tìm chuyến
+            </button>
+          </div>
+        </div>
+        <datalist id="stations-datalist"></datalist>
+      </form>
     </section>
 
-    <section class="card">
-      <h2>Bắt đầu từ đâu?</h2>
-      <ol>
-        <li>Xem trang <a href="pages/items.html">Items</a>: ví dụ 
-          thêm / sửa / xoá / tìm kiếm gọi API thật.</li>
-        <li>Đọc <code>js/api.js</code> để biết cách gọi API bằng axios.</li>
-        <li>Tạo trang mới: copy <code>pages/items.html</code> + <code>js/pages/items.js</code>, thêm link vào <code>js/layout.js</code>.</li>
-      </ol>
+    <!-- Tuyến đường phổ biến -->
+    <section>
+      <div class="section-header">
+        <h2>Tuyến đường phổ biến</h2>
+        <a href="pages/trips.html" class="btn btn-small">Xem tất cả chuyến xe →</a>
+      </div>
+      <div id="popular-routes-container" class="routes-grid">
+        <div class="card muted">Đang tải danh sách tuyến đường...</div>
+      </div>
+    </section>
+
+    <!-- Ưu điểm nền tảng -->
+    <section>
+      <div class="section-header">
+        <h2>Vì sao chọn BusGo?</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Sơ đồ ghế trực quan</h3>
+          <p>Xem chính xác vị trí ghế/giường trống theo từng tầng và giữ ghế tạm thời trong lúc điền thông tin.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Giá vé minh bạch</h3>
+          <p>Niêm yết đúng giá nhà xe, không phụ phí ẩn, hỗ trợ thanh toán chuyển khoản, ví điện tử và tiền mặt.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Vé điện tử & Tra cứu 24/7</h3>
+          <p>Nhận mã đặt chỗ ngay sau khi thanh toán, dễ dàng tra cứu hoặc hủy vé trực tuyến theo quy định.</p>
+        </div>
+      </div>
     </section>
   </main>
 
   <footer id="app-footer"></footer>
 
-  <!-- Thứ tự quan trọng: axios -> config -> api -> utils -> layout -> script riêng của trang -->
   <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/pages/home.js"></script>
 </body>

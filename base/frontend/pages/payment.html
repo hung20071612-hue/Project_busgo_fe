@@ -1,223 +1,151 @@
 <!DOCTYPE html>
-<html lang="vi" class="h-full">
+<html lang="vi">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BusGo - Thanh toán</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script>
-  tailwind.config = {
-    theme: { extend: { fontFamily: { sans: ["Inter", "sans-serif"], headline: ["Plus Jakarta Sans", "sans-serif"] } } }
-  };
-</script>
-<!-- Thư viện JS tạo mã QR -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; line-height: 1; }
-  .material-symbols-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  #qrBox img, #qrBox canvas { margin: 0 auto; }
-  @media print {
-    header, #stepper, .no-print { display: none !important; }
-    body { background: #fff !important; }
-    #ticketCard { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán & Xác nhận vé | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/booking-flow.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="min-h-full bg-[#F8FAFC] font-sans text-slate-800 antialiased">
+<body data-root="../">
+  <header id="app-header"></header>
 
-<!-- HEADER -->
-<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20">
-  <a href="../index.html" class="flex items-center gap-3">
-    <div class="w-9 h-9 rounded-lg bg-orange-500 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
-      <span class="material-symbols-outlined text-xl">directions_bus</span>
-    </div>
-    <span class="font-headline text-xl font-bold text-slate-900 tracking-tight">BusGo</span>
-  </a>
-  <a id="backLink" href="../index.html" class="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-slate-800">
-    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-    Quay lại
-  </a>
-</header>
+  <main class="container">
+    <ol id="stepper" class="booking-stepper">
+      <li class="step-item done"><span class="step-num">✓</span><span>Chọn ghế</span></li>
+      <li class="step-line"></li>
+      <li class="step-item done"><span class="step-num">✓</span><span>Thông tin hành khách</span></li>
+      <li class="step-line"></li>
+      <li id="stepPay" class="step-item active"><span class="step-num">3</span><span>Thanh toán</span></li>
+      <li class="step-line"></li>
+      <li id="stepDone" class="step-item"><span class="step-num">4</span><span>Xác nhận vé</span></li>
+    </ol>
 
-<main class="max-w-5xl mx-auto p-4 sm:p-6 space-y-5">
-
-  <!-- Các bước đặt vé -->
-  <ol id="stepper" class="flex items-center justify-between gap-2 text-[12px] font-semibold">
-    <li class="flex items-center gap-2 text-emerald-600" data-step="1"><span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center material-symbols-outlined text-[16px]">check</span><span class="hidden sm:inline">Chọn ghế</span></li>
-    <li class="flex-1 h-px bg-slate-300"></li>
-    <li class="flex items-center gap-2 text-emerald-600" data-step="2"><span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center material-symbols-outlined text-[16px]">check</span><span class="hidden sm:inline">Thông tin hành khách</span></li>
-    <li class="flex-1 h-px bg-slate-300"></li>
-    <li id="stepPay" class="flex items-center gap-2 text-orange-600" data-step="3"><span class="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-[12px]">3</span><span class="hidden sm:inline">Thanh toán</span></li>
-    <li class="flex-1 h-px bg-slate-300"></li>
-    <li id="stepDone" class="flex items-center gap-2 text-slate-400" data-step="4"><span class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[12px]">4</span><span class="hidden sm:inline">Xác nhận</span></li>
-  </ol>
-
-  <!-- Thông báo lỗi tải trang -->
-  <div id="errorBox" class="hidden bg-white rounded-xl border border-rose-200 p-10 text-center">
-    <span class="material-symbols-outlined text-rose-500 text-[36px]">error</span>
-    <p id="errorText" class="text-sm text-slate-600 mt-2"></p>
-    <a id="errorLink" href="../index.html" class="inline-block mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-bold">Về trang chủ</a>
-  </div>
-
-  <!-- ===== BƯỚC 3: THANH TOÁN ===== -->
-  <div id="payView" class="hidden flex flex-col lg:flex-row gap-5 items-start">
-
-    <!-- Trái: chọn phương thức -->
-    <section class="flex-1 w-full min-w-0 space-y-4">
-      <div>
-        <span class="text-[11px] font-bold text-orange-600 uppercase tracking-wider">Bước 3</span>
-        <h1 class="font-headline text-2xl font-bold text-slate-900 leading-tight">Chọn phương thức thanh toán</h1>
-        <p class="text-sm text-slate-500 mt-0.5">Đây là thanh toán giả lập, không có tiền thật bị trừ.</p>
-      </div>
-
-      <div class="grid gap-3" id="methodList">
-        <label class="relative cursor-pointer">
-          <input type="radio" name="method" value="CASH" class="peer sr-only"/>
-          <div class="rounded-xl border-2 border-slate-200 bg-white p-4 flex items-center gap-4 transition-all hover:border-orange-300 peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-focus-visible:ring-2 peer-focus-visible:ring-orange-300">
-            <div class="w-11 h-11 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><span class="material-symbols-outlined">payments</span></div>
-            <div class="flex-1"><p class="font-bold text-slate-800">Tiền mặt</p><p class="text-xs text-slate-500">Thanh toán trực tiếp khi lên xe hoặc tại quầy</p></div>
-            <span class="material-symbols-outlined material-symbols-fill text-orange-500 opacity-0 transition-opacity" data-check>check_circle</span>
-          </div>
-        </label>
-        <label class="relative cursor-pointer">
-          <input type="radio" name="method" value="TRANSFER" class="peer sr-only"/>
-          <div class="rounded-xl border-2 border-slate-200 bg-white p-4 flex items-center gap-4 transition-all hover:border-orange-300 peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-focus-visible:ring-2 peer-focus-visible:ring-orange-300">
-            <div class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><span class="material-symbols-outlined">account_balance</span></div>
-            <div class="flex-1"><p class="font-bold text-slate-800">Chuyển khoản ngân hàng</p><p class="text-xs text-slate-500">Chuyển khoản theo hướng dẫn (giả lập)</p></div>
-            <span class="material-symbols-outlined material-symbols-fill text-orange-500 opacity-0 transition-opacity" data-check>check_circle</span>
-          </div>
-        </label>
-        <label class="relative cursor-pointer">
-          <input type="radio" name="method" value="WALLET" class="peer sr-only"/>
-          <div class="rounded-xl border-2 border-slate-200 bg-white p-4 flex items-center gap-4 transition-all hover:border-orange-300 peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-focus-visible:ring-2 peer-focus-visible:ring-orange-300">
-            <div class="w-11 h-11 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center"><span class="material-symbols-outlined">account_balance_wallet</span></div>
-            <div class="flex-1"><p class="font-bold text-slate-800">Ví điện tử</p><p class="text-xs text-slate-500">Thanh toán bằng ví (giả lập)</p></div>
-            <span class="material-symbols-outlined material-symbols-fill text-orange-500 opacity-0 transition-opacity" data-check>check_circle</span>
-          </div>
-        </label>
-      </div>
-    </section>
-
-    <!-- Phải: tóm tắt đơn -->
-    <aside class="w-full lg:w-96 shrink-0 lg:sticky lg:top-20 space-y-4">
-      <div id="timerCard" class="hidden rounded-xl border border-orange-200 bg-orange-50 p-4">
-        <div class="flex items-center justify-between">
-          <span class="flex items-center gap-1.5 text-xs font-bold text-orange-700 uppercase tracking-wider">
-            <span class="material-symbols-outlined text-[18px]">timer</span> Giữ ghế còn
-          </span>
-          <span id="timerText" class="font-headline text-2xl font-extrabold text-orange-600 tabular-nums">--:--</span>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
-        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Tóm tắt đơn đặt vé</h2>
-        <dl class="text-sm space-y-1.5">
-          <div class="flex justify-between gap-3"><dt class="text-slate-500">Mã vé</dt><dd id="sumCode" class="font-mono font-bold text-slate-800">-</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-slate-500">Tuyến</dt><dd id="sumRoute" class="font-semibold text-slate-800 text-right">-</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-slate-500">Khởi hành</dt><dd id="sumDeparture" class="font-semibold text-slate-800 text-right">-</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-slate-500">Điểm đón</dt><dd id="sumPickup" class="font-semibold text-slate-800 text-right">-</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-slate-500">Điểm trả</dt><dd id="sumDropoff" class="font-semibold text-slate-800 text-right">-</dd></div>
-        </dl>
-        <div class="border-t border-slate-100 pt-3">
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Hành khách</p>
-          <ul id="sumPassengers" class="space-y-2 text-sm"></ul>
-        </div>
-        <div class="border-t border-slate-100 pt-4 flex items-end justify-between">
-          <span class="text-sm text-slate-500">Tổng thanh toán</span>
-          <span id="sumTotal" class="font-headline text-[22px] leading-7 font-bold text-orange-600">0 đ</span>
-        </div>
-        <button id="payBtn" type="button" disabled
-          class="w-full py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
-          Xác nhận thanh toán
-        </button>
-      </div>
-    </aside>
-  </div>
-
-  <!-- ===== BƯỚC 4: XÁC NHẬN ĐẶT VÉ ===== -->
-  <div id="doneView" class="hidden space-y-5">
-    <div class="text-center">
-      <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3">
-        <span class="material-symbols-outlined material-symbols-fill text-[34px]">check_circle</span>
-      </div>
-      <h1 class="font-headline text-2xl font-bold text-slate-900">Đặt vé thành công</h1>
-      <p class="text-sm text-slate-500 mt-1">Đưa mã QR bên dưới cho nhân viên để soát vé khi lên xe.</p>
+    <div id="errorBox" class="card" hidden style="text-align:center; padding: 32px;">
+      <h2>Không thể tải đơn đặt vé</h2>
+      <p id="errorText" class="muted"></p>
+      <a id="errorLink" href="trips.html" class="btn btn-primary">Tìm chuyến xe</a>
     </div>
 
-    <!-- Vé -->
-    <div id="ticketCard" class="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="bg-[#0F172A] text-white px-5 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-md bg-orange-500 flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">directions_bus</span></div>
-          <span class="font-headline font-bold">BusGo</span>
-        </div>
-        <span class="text-[11px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full">Đã thanh toán</span>
-      </div>
+    <!-- BƯỚC 3: CHỌN PHƯƠNG THỨC THANH TOÁN -->
+    <div id="payView" class="flow-grid" hidden>
+      <section class="card">
+        <span class="eyebrow">BƯỚC 3 / 4</span>
+        <h1>Chọn phương thức thanh toán</h1>
+        <p class="muted">Cổng thanh toán mô phỏng BusGo — xác nhận giao dịch tức thì và xuất vé điện tử.</p>
 
-      <div class="flex flex-col sm:flex-row">
-        <div class="flex-1 p-5 space-y-4">
+        <div id="methodList" style="margin-top: 16px;">
+          <label class="pay-method-card" data-method="TRANSFER">
+            <input type="radio" name="pay_method" value="TRANSFER" style="width:auto;">
+            <div>
+              <strong>Chuyển khoản ngân hàng (VietQR 24/7)</strong>
+              <div class="muted" style="font-size: 13px;">Xác nhận tự động ngay sau khi bấm thanh toán.</div>
+            </div>
+          </label>
+
+          <label class="pay-method-card" data-method="WALLET">
+            <input type="radio" name="pay_method" value="WALLET" style="width:auto;">
+            <div>
+              <strong>Ví điện tử (MoMo / ZaloPay / VNPay)</strong>
+              <div class="muted" style="font-size: 13px;">Thanh toán nhanh qua ví điện tử liên kết.</div>
+            </div>
+          </label>
+
+          <label class="pay-method-card" data-method="CASH">
+            <input type="radio" name="pay_method" value="CASH" style="width:auto;">
+            <div>
+              <strong>Tiền mặt tại quầy / Khi lên xe</strong>
+              <div class="muted" style="font-size: 13px;">Xác nhận giữ chỗ ngay, xuất trình mã vé cho nhân viên soát vé.</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-actions" style="justify-content: space-between; margin-top: 20px;">
+          <a id="backLink" href="my-bookings.html" class="btn">← Danh sách vé</a>
+          <button id="payBtn" type="button" class="btn btn-accent" style="padding: 12px 24px;" disabled>
+            Xác nhận thanh toán →
+          </button>
+        </div>
+      </section>
+
+      <aside class="sticky-aside">
+        <div id="timerCard" class="timer-banner" hidden>
+          <div class="timer-top">
+            <strong style="font-size:13px; color:#9a3412;">THỜI GIAN THANH TOÁN</strong>
+            <span id="timerText" class="timer-digits">10:00</span>
+          </div>
+          <div class="timer-bar-bg">
+            <div id="timerBar" class="timer-bar-fill" style="width:100%;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Chi tiết đơn đặt vé</h2>
+          <div class="summary-row"><span class="muted">Mã đơn</span><strong id="sumCode">—</strong></div>
+          <div class="summary-row"><span class="muted">Tuyến</span><strong id="sumRoute">—</strong></div>
+          <div class="summary-row"><span class="muted">Khởi hành</span><strong id="sumDeparture">—</strong></div>
+          <div class="summary-row"><span class="muted">Điểm đón</span><strong id="sumPickup">—</strong></div>
+          <div class="summary-row"><span class="muted">Điểm trả</span><strong id="sumDropoff">—</strong></div>
+          <div style="margin-top: 10px;">
+            <span class="muted" style="font-size: 13px;">Hành khách:</span>
+            <ul id="sumPassengers" style="padding-left: 18px; margin: 6px 0; font-size: 13px;"></ul>
+          </div>
+          <div class="summary-row" style="margin-top: 10px; padding-top: 12px; border-top: 2px solid var(--color-border);">
+            <strong>Tổng cộng</strong>
+            <strong id="sumTotal" style="font-size: 20px; color: #ea580c;">—</strong>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- BƯỚC 4: XÁC NHẬN & VÉ ĐIỆN TỬ QR -->
+    <div id="doneView" hidden>
+      <div id="ticketCard" class="card" style="max-width: 720px; margin: 0 auto;">
+        <div style="text-align: center; padding-bottom: 16px; border-bottom: 1px dashed var(--color-border);">
+          <span class="badge-status badge-paid">THANH TOÁN THÀNH CÔNG</span>
+          <h1 style="margin: 10px 0 4px;">Vé điện tử BusGo (Boarding Pass)</h1>
+          <p class="muted" style="margin:0;">Xuất trình mã QR bên dưới cho nhân viên khi lên xe</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; margin-top: 20px;">
+          <div style="text-align:center; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; background:#fff;">
+            <div id="qrBox" style="display:flex; justify-content:center;"></div>
+            <strong id="ticketCode" style="display:block; margin-top: 8px; font-size: 15px; color:#1e3a8a;">—</strong>
+          </div>
+
           <div>
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mã vé</p>
-            <p id="tkCode" class="font-mono text-2xl font-bold text-slate-900 tracking-wide">-</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="flex-1"><p class="text-[11px] text-slate-400 uppercase font-bold">Điểm đi</p><p id="tkFrom" class="font-semibold text-slate-800">-</p></div>
-            <span class="material-symbols-outlined text-orange-500">arrow_forward</span>
-            <div class="flex-1 text-right"><p class="text-[11px] text-slate-400 uppercase font-bold">Điểm đến</p><p id="tkTo" class="font-semibold text-slate-800">-</p></div>
-          </div>
-          <dl class="text-sm grid grid-cols-2 gap-x-4 gap-y-2">
-            <div><dt class="text-slate-400 text-xs">Khởi hành</dt><dd id="tkDeparture" class="font-semibold">-</dd></div>
-            <div><dt class="text-slate-400 text-xs">Thanh toán</dt><dd id="tkMethod" class="font-semibold">-</dd></div>
-            <div><dt class="text-slate-400 text-xs">Điểm đón</dt><dd id="tkPickup" class="font-semibold">-</dd></div>
-            <div><dt class="text-slate-400 text-xs">Điểm trả</dt><dd id="tkDropoff" class="font-semibold">-</dd></div>
-          </dl>
-          <div>
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Ghế và hành khách</p>
-            <ul id="tkPassengers" class="space-y-1.5 text-sm"></ul>
-          </div>
-          <div class="border-t border-dashed border-slate-300 pt-3 flex items-end justify-between">
-            <span class="text-sm text-slate-500">Tổng tiền</span>
-            <span id="tkTotal" class="font-headline text-xl font-bold text-orange-600">0 đ</span>
+            <div class="summary-row"><span class="muted">Tuyến đường</span><strong id="ticketRoute">—</strong></div>
+            <div class="summary-row"><span class="muted">Giờ khởi hành</span><strong id="ticketDeparture">—</strong></div>
+            <div class="summary-row"><span class="muted">Điểm đón → trả</span><strong id="ticketStops">—</strong></div>
+            <div class="summary-row"><span class="muted">Phương thức TT</span><strong id="ticketMethod">—</strong></div>
+            <div class="summary-row"><span class="muted">Tổng tiền đã thanh toán</span><strong id="ticketTotal" style="color:#16a34a; font-size:18px;">—</strong></div>
           </div>
         </div>
 
-        <!-- Đường xé vé + QR -->
-        <div class="sm:w-60 p-5 flex flex-col items-center justify-center gap-3 border-t sm:border-t-0 sm:border-l border-dashed border-slate-300 bg-slate-50">
-          <div id="qrBox" class="bg-white p-2 rounded-lg border border-slate-200"></div>
-          <p class="text-[11px] text-slate-500 text-center">Quét mã để soát vé</p>
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-border);">
+          <strong>Danh sách ghế & hành khách</strong>
+          <ul id="ticketPassengers" style="padding-left: 18px; margin-top: 8px;"></ul>
+        </div>
+
+        <div class="form-actions no-print" style="justify-content: center; margin-top: 20px;">
+          <button type="button" class="btn" onclick="window.print()">In vé / Lưu PDF</button>
+          <a href="my-bookings.html" class="btn btn-primary">Xem Vé của tôi</a>
+          <a href="../index.html" class="btn">Về trang chủ</a>
         </div>
       </div>
     </div>
+  </main>
 
-    <div class="no-print max-w-3xl mx-auto flex flex-col sm:flex-row gap-3 justify-center">
-      <button id="printBtn" type="button" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-[18px]">print</span> In vé
-      </button>
-      <a href="my-tickets.html" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold text-center">Xem vé của tôi</a>
-      <a href="../index.html" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-bold text-center shadow-sm">Về trang chủ</a>
-    </div>
-  </div>
-</main>
+  <footer id="app-footer"></footer>
 
-<!-- Thông báo nhỏ -->
-<div id="toast" class="fixed top-20 right-4 z-40 hidden max-w-sm rounded-lg bg-slate-900 text-white text-sm px-4 py-3 shadow-lg"></div>
-
-<!-- Hết giờ giữ ghế -->
-<div id="expiredModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4">
-  <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
-    <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3">
-      <span class="material-symbols-outlined text-[28px]">timer_off</span>
-    </div>
-    <h3 class="font-headline text-lg font-bold text-slate-900">Đã hết thời gian giữ ghế</h3>
-    <p class="text-sm text-slate-500 mt-1">Đơn đã hết hạn thanh toán. Vui lòng chọn lại ghế.</p>
-    <a id="expiredLink" href="../index.html" class="mt-5 block w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-bold">Chọn lại ghế</a>
-  </div>
-</div>
-
-<script src="../js/pages/payment.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/payment.js"></script>
 </body>
 </html>

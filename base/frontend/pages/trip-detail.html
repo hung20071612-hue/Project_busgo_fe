@@ -1,33 +1,145 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5f8ff"><title>Chi tiết chuyến xe | BusGo</title>
-  <link rel="icon" href="../assets/images/logo.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết chuyến xe | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/booking-flow.css">
 </head>
-<body data-root="../" class="detail-page">
+<body data-root="../">
   <header id="app-header"></header>
-  <main class="container detail-main">
-    <nav class="breadcrumbs" aria-label="Điều hướng"><a href="../index.html">Trang chủ</a><span>›</span><a href="trips.html">Tìm chuyến</a><span>›</span><span>Chi tiết chuyến</span></nav>
-    <p id="detail-status" class="muted" role="status" aria-live="polite">Đang tải thông tin chuyến xe…</p>
-    <div id="trip-detail-content" class="detail-layout" hidden>
-      <div class="detail-main-column">
-        <section class="card detail-operator-card">
-          <div class="detail-operator-heading"><span class="operator-mark operator-mark-large">B</span><div><span class="eyebrow">THÔNG TIN NHÀ XE</span><h1 id="detail-operator">Chuyến xe BusGo</h1><p id="detail-driver" class="muted"></p></div><span class="trip-pill">● Còn nhận khách</span></div>
-          <div class="detail-highlights"><div><span>↔</span><strong id="detail-distance">Tuyến liên tỉnh</strong><small>Hành trình</small></div><div><span>◷</span><strong id="detail-duration">—</strong><small>Thời gian di chuyển</small></div><div><span>♧</span><strong id="detail-seats">—</strong><small>Ghế còn trống</small></div><div><span>▣</span><strong id="detail-bus">—</strong><small>Phương tiện</small></div></div>
-        </section>
-        <section class="card route-timeline-card"><div class="detail-section-heading"><div><span class="eyebrow">LỘ TRÌNH</span><h2>Lịch trình chuyến đi</h2></div><span class="status-check">✓ Đã xác nhận</span></div>
-          <div class="route-timeline"><article class="timeline-stop timeline-start"><span class="timeline-marker"></span><div class="timeline-time" id="detail-departure-time">—</div><div class="timeline-copy"><span class="timeline-label">Điểm khởi hành</span><strong id="detail-origin">—</strong><small>Vui lòng có mặt trước giờ đi 15 phút.</small></div></article><article class="timeline-duration"><span>Chuyến đi thẳng · <b id="timeline-duration">—</b></span></article><article class="timeline-stop timeline-end"><span class="timeline-marker"></span><div class="timeline-time" id="detail-arrival-time">—</div><div class="timeline-copy"><span class="timeline-label">Điểm đến</span><strong id="detail-destination">—</strong><small>Chúc bạn có một hành trình vui vẻ.</small></div></article></div>
-        </section>
-        <section class="card amenities-card"><span class="eyebrow">TIỆN ÍCH TRÊN XE</span><h2>Thoải mái suốt hành trình</h2><div class="amenities-grid"><div><span>⌁</span><b>Điều hòa</b><small>Không gian thoáng mát</small></div><div><span>⌘</span><b>Wi-Fi</b><small>Kết nối trên xe</small></div><div><span>ϟ</span><b>Cổng sạc</b><small>Sạc thiết bị cá nhân</small></div><div><span>♧</span><b>Ghế ngả</b><small>Thư giãn khi di chuyển</small></div></div></section>
-      </div>
-      <aside class="card fare-card"><span class="trip-pill">VÉ ĐI MỘT CHIỀU</span><h2>Thông tin vé</h2><div class="fare-route"><strong id="fare-origin">—</strong><span>↓</span><strong id="fare-destination">—</strong></div><div class="fare-meta"><span>Ngày khởi hành</span><strong id="detail-date">—</strong></div><div class="fare-meta"><span>Giờ đi</span><strong id="fare-time">—</strong></div><div class="fare-meta"><span>Phương tiện</span><strong id="fare-bus">—</strong></div><div class="fare-total"><span>Giá vé / người</span><strong id="detail-price">—</strong></div><button class="btn btn-accent choose-seat-button" id="choose-seats" type="button">Chọn ghế <span aria-hidden="true">→</span></button><p class="fare-help">Cần hỗ trợ? Gọi tổng đài <strong>1900 6868</strong></p><div class="fare-assurance">✓ Thông tin chuyến xe được cập nhật từ hệ thống.</div></aside>
+
+  <main class="container">
+    <nav class="breadcrumbs" aria-label="Điều hướng">
+      <a href="../index.html">Trang chủ</a><span>›</span>
+      <a href="trips.html">Tìm chuyến</a><span>›</span>
+      <span>Chi tiết chuyến</span>
+    </nav>
+
+    <div id="detail-status" class="status status-loading">Đang tải thông tin chuyến xe...</div>
+
+    <div id="detail-error" class="card" hidden style="text-align:center; padding: 32px;">
+      <h2>Không tải được chuyến xe</h2>
+      <p id="detail-error-message" class="muted">Hãy quay lại danh sách để chọn một chuyến phù hợp.</p>
+      <a href="trips.html" class="btn btn-primary">Quay lại danh sách chuyến</a>
     </div>
-    <div id="detail-error" class="empty-state" hidden><span class="empty-icon">⌁</span><h2>Chưa tải được chuyến xe</h2><p id="detail-error-message">Hãy quay lại danh sách để chọn một chuyến phù hợp.</p><a href="trips.html" class="btn btn-primary">Quay lại danh sách chuyến</a></div>
+
+    <div id="trip-detail-content" class="flow-grid" hidden>
+      <div>
+        <section class="card">
+          <div class="trip-operator">
+            <span class="operator-mark">BG</span>
+            <div>
+              <span class="eyebrow">THÔNG TIN CHUYẾN XE</span>
+              <h1 id="detail-operator" style="margin:0; font-size:22px;">Chuyến xe BusGo</h1>
+              <p id="detail-driver" class="muted" style="margin:2px 0 0;"></p>
+            </div>
+            <span class="trip-pill">Đang nhận khách</span>
+          </div>
+
+          <div class="detail-highlights">
+            <div class="highlight-box">
+              <strong id="detail-distance">—</strong>
+              <small>Quãng đường</small>
+            </div>
+            <div class="highlight-box">
+              <strong id="detail-duration">—</strong>
+              <small>Thời gian dự kiến</small>
+            </div>
+            <div class="highlight-box">
+              <strong id="detail-seats" style="color:#16a34a;">—</strong>
+              <small>Ghế còn trống</small>
+            </div>
+            <div class="highlight-box">
+              <strong id="detail-bus">—</strong>
+              <small>Biển số & Loại xe</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <span class="eyebrow">LỘ TRÌNH DI CHUYỂN</span>
+          <h2>Lịch trình đón / trả dự kiến</h2>
+
+          <div class="trip-schedule" style="margin-top: 12px;">
+            <div class="schedule-stop">
+              <strong id="detail-departure-time">—</strong>
+              <span id="detail-origin">—</span>
+              <small id="detail-origin-addr">Có mặt trước giờ khởi hành 15 phút</small>
+            </div>
+            <div class="schedule-line">
+              <span id="timeline-duration">—</span>
+              <i></i>
+              <small>Chuyến đi thẳng</small>
+            </div>
+            <div class="schedule-stop schedule-arrival">
+              <strong id="detail-arrival-time">—</strong>
+              <span id="detail-destination">—</span>
+              <small id="detail-dest-addr">Điểm trả khách cuối tuyến</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <span class="eyebrow">TIỆN ÍCH & CHÍNH SÁCH</span>
+          <h2>Quy định vé xe BusGo</h2>
+          <ul style="padding-left: 20px; color: #334155; margin-bottom: 0;">
+            <li>Giữ ghế tạm thời trong <strong>10 phút</strong> ngay sau khi chọn chỗ trên sơ đồ.</li>
+            <li>Đặt tối đa <strong>5 ghế</strong> cho mỗi lượt giao dịch.</li>
+            <li>Hủy vé trước giờ khởi hành <strong>≥ 24 giờ</strong> được hoàn <strong>100%</strong> tiền vé.</li>
+            <li>Trang bị điều hòa, Wi-Fi tốc độ cao, cổng sạc USB và nước uống miễn phí.</li>
+          </ul>
+        </section>
+      </div>
+
+      <aside class="card sticky-aside">
+        <span class="trip-pill" style="margin-left:0;">VÉ MỘT CHIỀU</span>
+        <h2 style="margin-top: 10px;">Tóm tắt chuyến</h2>
+        <div class="summary-row">
+          <span class="muted">Điểm đi</span>
+          <strong id="fare-origin">—</strong>
+        </div>
+        <div class="summary-row">
+          <span class="muted">Điểm đến</span>
+          <strong id="fare-destination">—</strong>
+        </div>
+        <div class="summary-row">
+          <span class="muted">Ngày khởi hành</span>
+          <strong id="detail-date">—</strong>
+        </div>
+        <div class="summary-row">
+          <span class="muted">Khung giờ</span>
+          <strong id="fare-time">—</strong>
+        </div>
+        <div class="summary-row">
+          <span class="muted">Phương tiện</span>
+          <strong id="fare-bus">—</strong>
+        </div>
+        <div class="summary-row" style="margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--color-border);">
+          <span>Giá vé / ghế</span>
+          <strong id="detail-price" style="font-size: 22px; color: #ea580c;">—</strong>
+        </div>
+
+        <a id="choose-seats" href="trips.html" class="btn btn-accent w-full" style="margin-top: 16px; padding: 12px;">
+          Tiếp tục chọn ghế →
+        </a>
+        <p class="muted" style="font-size: 12px; text-align: center; margin-top: 10px;">
+          Tổng đài hỗ trợ 24/7: <strong>1900 6868</strong>
+        </p>
+      </aside>
+    </div>
   </main>
+
   <footer id="app-footer"></footer>
-  <dialog id="seat-info-dialog" class="seat-info-dialog"><form method="dialog"><button class="dialog-close" aria-label="Đóng">×</button></form><span class="service-icon">♧</span><h2>Chọn ghế cho hành trình</h2><p>Thông tin ghế trống đã được cập nhật. Bước chọn ghế sẽ tiếp tục khi tính năng đặt vé được kết nối.</p><button class="btn btn-primary" id="seat-dialog-ok" type="button">Đã hiểu</button></dialog>
-  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script><script src="../js/config.js"></script><script src="../js/api.js"></script><script src="../js/utils.js"></script><script src="../js/layout.js"></script><script src="../js/pages/trip-detail.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/trip-detail.js"></script>
 </body>
 </html>

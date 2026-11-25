@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý người dùng & Tài xế - BusGo Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: { 50: '#FFF7ED', 100: '#FFEDD5', 500: '#F97316', 600: '#EA580C', 700: '#C2410C' }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 font-sans antialiased min-h-screen flex">
+
+  <!-- Admin Sidebar -->
+  <aside class="w-64 bg-slate-900 text-slate-300 hidden lg:flex flex-col shrink-0">
+    <div class="h-16 px-6 flex items-center gap-2.5 border-b border-slate-800">
+      <div class="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center">
+        <span class="material-symbols-outlined text-[22px]">directions_bus</span>
+      </div>
+      <div>
+        <span class="font-display font-extrabold text-lg text-white tracking-tight">Bus<span class="text-brand-500">Go</span></span>
+        <span class="block text-[10px] uppercase tracking-widest text-slate-400">Admin Portal</span>
+      </div>
+    </div>
+
+    <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+      <a href="admin-dashboard.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+        Tổng quan hệ thống
+      </a>
+      <a href="admin-routes.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">alt_route</span>
+        Quản lý tuyến đường
+      </a>
+      <a href="admin-trips.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">departure_board</span>
+        Quản lý chuyến xe
+      </a>
+      <a href="admin-seat-maps.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">event_seat</span>
+        Loại xe & Sơ đồ ghế
+      </a>
+      <a href="admin-users.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold shadow-sm">
+        <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+        Người dùng & Tài xế
+      </a>
+      <div class="pt-4 mt-4 border-t border-slate-800 space-y-1">
+        <a href="profile.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+          <span class="material-symbols-outlined text-[20px]">account_circle</span>
+          Hồ sơ cá nhân
+        </a>
+        <a href="staff-passengers.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+          <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+          Cổng soát vé Staff
+        </a>
+        <a href="../index.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+          <span class="material-symbols-outlined text-[20px]">storefront</span>
+          Về trang đặt vé
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Topbar -->
+    <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 h-16 px-4 sm:px-8 flex items-center justify-between">
+      <div>
+        <h1 class="font-display font-bold text-lg sm:text-xl text-slate-900">Quản lý người dùng & Đội ngũ tài xế</h1>
+      </div>
+
+      <button id="btn-primary-add" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-xs transition">
+        <span class="material-symbols-outlined text-[19px]">person_add</span>
+        <span id="btn-primary-add-label">Thêm tài khoản</span>
+      </button>
+    </header>
+
+    <main class="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-6">
+      <!-- 3 KPI Overview Cards -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tài khoản hệ thống</span>
+            <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-500 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">group</span>
+            </div>
+          </div>
+          <div id="kpi-total-users" class="font-display font-extrabold text-2xl text-slate-900 mt-2.5">0</div>
+          <p id="kpi-users-breakdown" class="text-xs text-slate-500 mt-1">0 khách hàng • 0 nhân sự nội bộ</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Nhân sự vận hành (Admin / Staff)</span>
+            <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">shield_person</span>
+            </div>
+          </div>
+          <div id="kpi-staff-admin" class="font-display font-extrabold text-2xl text-slate-900 mt-2.5">0</div>
+          <p id="kpi-staff-breakdown" class="text-xs text-slate-500 mt-1">0 Admin • 0 Nhân viên soát vé</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Đội ngũ tài xế</span>
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">airline_seat_recline_extra</span>
+            </div>
+          </div>
+          <div id="kpi-total-drivers" class="font-display font-extrabold text-2xl text-slate-900 mt-2.5">0</div>
+          <p id="kpi-drivers-breakdown" class="text-xs text-emerald-600 font-medium mt-1">0 sẵn sàng nhận chuyến</p>
+        </div>
+      </section>
+
+      <!-- Module Tabs -->
+      <div class="bg-white border border-slate-200 rounded-xl p-1.5 inline-flex gap-1.5 shadow-xs">
+        <button id="tab-users" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-brand-500 text-white transition">
+          <span class="material-symbols-outlined text-[18px]">account_circle</span>
+          <span>Tài khoản người dùng</span>
+          <span id="count-users-tab" class="px-2 py-0.5 text-xs rounded-full bg-white/20 text-white">0</span>
+        </button>
+        <button id="tab-drivers" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+          <span class="material-symbols-outlined text-[18px]">id_card</span>
+          <span>Đội ngũ tài xế</span>
+          <span id="count-drivers-tab" class="px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-600">0</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: USERS PANEL -->
+      <section id="panel-users" class="space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center shadow-xs">
+          <div class="sm:col-span-6 relative">
+            <span class="material-symbols-outlined text-slate-400 text-[19px] absolute left-3 top-1/2 -translate-y-1/2">search</span>
+            <input id="user-search" type="text" placeholder="Tìm họ tên, email, số điện thoại..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div class="sm:col-span-3">
+            <select id="user-role-filter" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:border-brand-500">
+              <option value="ALL">Tất cả vai trò</option>
+              <option value="CUSTOMER">Khách hàng (USER)</option>
+              <option value="STAFF">Nhân viên (STAFF)</option>
+              <option value="ADMIN">Quản trị viên (ADMIN)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3 text-right text-xs text-slate-500">
+            Hiển thị <strong id="user-visible-count" class="text-slate-900">0</strong> tài khoản
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                <tr>
+                  <th class="px-5 py-3.5 font-semibold">ID</th>
+                  <th class="px-5 py-3.5 font-semibold">Họ và tên</th>
+                  <th class="px-5 py-3.5 font-semibold">Email / SĐT</th>
+                  <th class="px-5 py-3.5 font-semibold">Vai trò</th>
+                  <th class="px-5 py-3.5 font-semibold">Trạng thái</th>
+                  <th class="px-5 py-3.5 font-semibold text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody" class="divide-y divide-slate-100">
+                <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">Đang tải danh sách người dùng...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: DRIVERS PANEL -->
+      <section id="panel-drivers" class="hidden space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center shadow-xs">
+          <div class="sm:col-span-6 relative">
+            <span class="material-symbols-outlined text-slate-400 text-[19px] absolute left-3 top-1/2 -translate-y-1/2">search</span>
+            <input id="driver-search" type="text" placeholder="Tìm tên tài xế, SĐT, số bằng lái..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div class="sm:col-span-3">
+            <select id="driver-status-filter" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:border-brand-500">
+              <option value="ALL">Tất cả trạng thái</option>
+              <option value="AVAILABLE">Sẵn sàng nhận chuyến</option>
+              <option value="ON_TRIP">Đang chạy tuyến</option>
+              <option value="OFF_DUTY">Nghỉ phép / Tạm ngưng</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3 text-right text-xs text-slate-500">
+            Hiển thị <strong id="driver-visible-count" class="text-slate-900">0</strong> tài xế
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                <tr>
+                  <th class="px-5 py-3.5 font-semibold">Mã TX</th>
+                  <th class="px-5 py-3.5 font-semibold">Họ tên tài xế</th>
+                  <th class="px-5 py-3.5 font-semibold">Số điện thoại</th>
+                  <th class="px-5 py-3.5 font-semibold">Giấy phép lái xe</th>
+                  <th class="px-5 py-3.5 font-semibold">Kinh nghiệm</th>
+                  <th class="px-5 py-3.5 font-semibold">Trạng thái</th>
+                  <th class="px-5 py-3.5 font-semibold text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="drivers-tbody" class="divide-y divide-slate-100">
+                <tr><td colspan="7" class="px-5 py-8 text-center text-slate-400">Đang tải danh sách tài xế...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL 1: CREATE / EDIT USER -->
+  <div id="user-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 id="user-modal-title" class="font-display font-bold text-lg text-slate-900">Thêm tài khoản mới</h3>
+        <button type="button" id="btn-close-user-modal" class="text-slate-400 hover:text-slate-600">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="user-form" class="space-y-4">
+        <input type="hidden" id="edit-user-id" />
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Họ và tên *</label>
+          <input id="u-fullname" type="text" required placeholder="VD: Nguyễn Văn An" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Email đăng nhập *</label>
+            <input id="u-email" type="email" required placeholder="an.nguyen@busgo.vn" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Số điện thoại</label>
+            <input id="u-phone" type="tel" placeholder="0912345678" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">
+              Mật khẩu <span id="u-password-hint" class="font-normal text-slate-400">*</span>
+            </label>
+            <input id="u-password" type="password" placeholder="Nhập mật khẩu..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Phân quyền hệ thống *</label>
+            <select id="u-role" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+              <option value="USER">Khách hàng (USER)</option>
+              <option value="STAFF">Nhân viên soát vé (STAFF)</option>
+              <option value="ADMIN">Quản trị viên (ADMIN)</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2.5 pt-1 cursor-pointer select-none">
+          <input id="u-active" type="checkbox" checked class="w-4 h-4 rounded border-slate-300 text-brand-500 focus:ring-brand-500" />
+          <span class="text-sm text-slate-700 font-medium">Tài khoản đang kích hoạt (Cho phép đăng nhập)</span>
+        </label>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" id="btn-cancel-user" class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-medium text-slate-700">Hủy</button>
+          <button type="submit" id="btn-save-user" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition">Lưu tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CREATE / EDIT DRIVER -->
+  <div id="driver-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 id="driver-modal-title" class="font-display font-bold text-lg text-slate-900">Thêm hồ sơ tài xế</h3>
+        <button type="button" id="btn-close-driver-modal" class="text-slate-400 hover:text-slate-600">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="driver-form" class="space-y-4">
+        <input type="hidden" id="edit-driver-id" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Họ và tên tài xế *</label>
+            <input id="d-fullname" type="text" required placeholder="VD: Trần Minh Tuấn" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Số điện thoại liên hệ *</label>
+            <input id="d-phone" type="tel" required placeholder="0987654321" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Số Giấy phép lái xe *</label>
+            <input id="d-license-no" type="text" required placeholder="VD: 010198004521" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Hạng bằng lái</label>
+            <select id="d-license-class" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+              <option value="E">Hạng E (Xe khách trên 30 chỗ)</option>
+              <option value="D">Hạng D (Xe khách 10–30 chỗ)</option>
+              <option value="C">Hạng C</option>
+              <option value="B2">Hạng B2</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Số năm kinh nghiệm</label>
+            <input id="d-exp-years" type="number" min="0" max="50" value="3" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Trạng thái điều động</label>
+            <select id="d-status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+              <option value="AVAILABLE">Sẵn sàng nhận chuyến</option>
+              <option value="ON_TRIP">Đang chạy tuyến</option>
+              <option value="OFF_DUTY">Nghỉ phép / Tạm ngưng</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" id="btn-cancel-driver" class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-medium text-slate-700">Hủy</button>
+          <button type="submit" id="btn-save-driver" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition">Lưu hồ sơ tài xế</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/pages/admin-users.js"></script>
+</body>
+</html>

@@ -1,31 +1,286 @@
-```html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vé của tôi | BusGo</title>
-  <link rel="icon" href="../assets/images/logo.svg">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="../assets/images/logo.svg" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/booking-flow.css" />
+  <style>
+    .booking-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .booking-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .booking-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .booking-tab-btn:hover {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-color: #bfdbfe;
+    }
+
+    .booking-tab-btn.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.08);
+      color: inherit;
+    }
+
+    .booking-tab-btn.active .tab-count {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    .booking-search-wrap {
+      min-width: 260px;
+      flex: 0 1 300px;
+    }
+
+    .bookings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .booking-card {
+      margin-bottom: 0;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .booking-card:hover {
+      border-color: #93c5fd;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .booking-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .booking-code-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .booking-code-pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: var(--color-primary-light);
+      color: var(--color-primary-dark);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .booking-card-body {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 0.9fr;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 0;
+    }
+
+    @media (max-width: 820px) {
+      .booking-card-body {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .booking-search-wrap {
+        width: 100%;
+        flex: 1 1 100%;
+      }
+    }
+
+    .booking-route-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .booking-route-arrow {
+      color: var(--color-accent);
+      font-weight: 800;
+    }
+
+    .booking-meta-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--color-muted);
+    }
+
+    .booking-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-muted);
+      margin-bottom: 4px;
+    }
+
+    .booking-total-box {
+      text-align: right;
+    }
+
+    @media (max-width: 820px) {
+      .booking-total-box {
+        text-align: left;
+      }
+    }
+
+    .booking-total-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--color-accent-dark);
+    }
+
+    .booking-card-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 12px;
+      border-top: 1px dashed var(--color-border);
+    }
+
+    .empty-state-card {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-state-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+  </style>
 </head>
 <body data-root="../">
   <header id="app-header"></header>
 
   <main class="container">
+    <nav class="breadcrumbs" aria-label="Điều hướng">
+      <a href="../index.html">Trang chủ</a>
+      <span>›</span>
+      <span>Vé của tôi</span>
+    </nav>
+
+    <div class="list-header" style="margin-bottom: 16px;">
+      <div>
+        <span class="eyebrow">QUẢN LÝ VÉ ĐIỆN TỬ</span>
+        <h1 style="margin-bottom: 4px;">Vé của tôi</h1>
+        <p class="muted" style="margin: 0;">Theo dõi lịch sử đặt vé, thanh toán đơn chờ hoặc mở thẻ lên xe QR.</p>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="trips.html" class="btn btn-accent">Đặt vé mới →</a>
+      </div>
+    </div>
+
+    <!-- Bộ lọc trạng thái & Tìm kiếm nhanh -->
     <section class="card">
-      <h2>Vé của tôi</h2>
-      <p>Quản lý các vé xe đã đặt của bạn.</p>
+      <div class="booking-toolbar">
+        <div class="booking-tabs" id="status-tabs">
+          <button type="button" data-status="ALL" class="booking-tab-btn active">
+            <span>Tất cả</span>
+            <span id="count-ALL" class="tab-count">0</span>
+          </button>
+          <button type="button" data-status="PAID" class="booking-tab-btn">
+            <span>Đã thanh toán</span>
+            <span id="count-PAID" class="tab-count">0</span>
+          </button>
+          <button type="button" data-status="PENDING_PAYMENT" class="booking-tab-btn">
+            <span>Chờ thanh toán</span>
+            <span id="count-PENDING_PAYMENT" class="tab-count">0</span>
+          </button>
+          <button type="button" data-status="CANCELLED" class="booking-tab-btn">
+            <span>Đã hủy</span>
+            <span id="count-CANCELLED" class="tab-count">0</span>
+          </button>
+        </div>
 
-      <div class="form-actions">
-        <button class="btn btn-primary" data-status="all">Tất cả</button>
-        <button class="btn" data-status="PAID">Đã thanh toán</button>
-        <button class="btn" data-status="PENDING_PAYMENT">Chờ thanh toán</button>
-        <button class="btn" data-status="CANCELLED">Đã huỷ</button>      </div>
-
-      <div id="booking-list">
-        <p>Đang tải danh sách vé...</p>
+        <div class="booking-search-wrap">
+          <input
+            id="search-booking-input"
+            type="text"
+            placeholder="Tìm theo mã vé, điểm đi, điểm đến..."
+          />
+        </div>
       </div>
     </section>
+
+    <!-- Trạng thái tải / Lỗi / Trống -->
+    <div id="bookings-loading" class="status status-loading">Đang tải danh sách vé của bạn...</div>
+    <div id="bookings-error" class="status status-error" hidden></div>
+
+    <div id="bookings-empty" class="card empty-state-card" hidden>
+      <h3 style="margin-bottom: 6px;">Chưa có vé nào trong mục này</h3>
+      <p class="muted" style="max-width: 480px; margin: 0 auto;">
+        Bạn chưa có giao dịch đặt vé nào hoặc không tìm thấy vé phù hợp với bộ lọc hiện tại.
+      </p>
+      <div class="empty-state-actions">
+        <a href="trips.html" class="btn btn-accent">Tìm chuyến xe ngay</a>
+      </div>
+    </div>
+
+    <!-- Danh sách vé -->
+    <section id="bookings-list" class="bookings-list"></section>
   </main>
 
   <footer id="app-footer"></footer>
@@ -34,8 +289,8 @@
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
   <script src="../js/layout.js"></script>
   <script src="../js/pages/my-bookings.js"></script>
 </body>
 </html>
-```

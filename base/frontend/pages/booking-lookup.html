@@ -1,56 +1,267 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tra cứu vé | BusGo</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tra cứu vé điện tử - BusGo</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .lookup-hero {
+      max-width: 760px;
+      margin: 0 auto 24px;
+    }
+    .lookup-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .lookup-header .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-accent);
+      background: #fff7ed;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .lookup-form-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    @media (max-width: 720px) {
+      .lookup-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .ticket-result {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0;
+      overflow: hidden;
+    }
+    .ticket-banner {
+      background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .ticket-code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 700;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.16);
+      padding: 5px 12px;
+      border-radius: 8px;
+    }
+    .ticket-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 156px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 640px) {
+      .ticket-body {
+        grid-template-columns: 1fr;
+      }
+    }
+    .qr-box {
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+      text-align: center;
+    }
+    .qr-box #lookup-qr {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 128px;
+    }
+    .qr-box small {
+      display: block;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--color-muted);
+    }
+    .route-headline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      margin: 10px 0 14px;
+      flex-wrap: wrap;
+    }
+    .info-tiles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .info-tiles {
+        grid-template-columns: 1fr;
+      }
+    }
+    .info-tile {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .info-tile span {
+      display: block;
+      font-size: 12px;
+      color: var(--color-muted);
+    }
+    .info-tile strong {
+      display: block;
+      font-size: 14px;
+      margin-top: 2px;
+    }
+    .ticket-footer {
+      padding: 14px 24px;
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
-<body data-root="../">
+<body data-root="../" data-active="pages/booking-lookup.html">
+  <header id="app-header"></header>
 
-    <header id="app-header"></header>
+  <main class="container">
+    <section class="card lookup-hero">
+      <div class="lookup-header">
+        <span class="eyebrow">Không cần đăng nhập</span>
+        <h1>Tra cứu thông tin vé</h1>
+        <p class="muted">
+          Nhập <strong>Mã đặt vé</strong> (VD: <code>BG261125...</code> hoặc số ID vé) và <strong>Số điện thoại hành khách</strong> để xem trạng thái và mã QR lên xe.
+        </p>
+      </div>
 
-    <main class="container">
-        <section class="card">
-            <h2>Tra cứu vé</h2>
-            <p>Nhập mã vé và số điện thoại để tra cứu thông tin.</p>
+      <form id="lookup-form" class="lookup-form-grid">
+        <div>
+          <label for="lookup-code" style="margin-top: 0;">Mã vé *</label>
+          <input
+            id="lookup-code"
+            type="text"
+            required
+            placeholder="VD: BG261125A1B2C3 hoặc 12"
+          />
+        </div>
 
-            <form id="lookup-form">
-                <label for="booking-id">Mã vé</label>
-                <input
-                    type="number"
-                    id="booking-id"
-                    required
-                    min="1"
-                    placeholder="Nhập mã vé"
-                >
+        <div>
+          <label for="lookup-phone" style="margin-top: 0;">Số điện thoại *</label>
+          <input
+            id="lookup-phone"
+            type="tel"
+            required
+            placeholder="VD: 0912345678"
+          />
+        </div>
 
-                <label for="phone">Số điện thoại</label>
-                <input
-                    type="tel"
-                    id="phone"
-                    required
-                    placeholder="Nhập số điện thoại"
-                >
+        <div>
+          <button id="btn-lookup-submit" type="submit" class="btn btn-primary" style="height: 42px; width: 100%;">
+            Tra cứu vé
+          </button>
+        </div>
+      </form>
 
-                <button type="submit" class="btn btn-primary">
-                    Tra cứu
-                </button>
-            </form>
+      <div id="lookup-error" class="alert alert-error hidden" style="margin-top: 16px; margin-bottom: 0;">
+        <span id="lookup-error-msg">Không tìm thấy vé khớp với thông tin đã nhập.</span>
+      </div>
+    </section>
 
-            <div id="lookup-result"></div>
-        </section>
-    </main>
+    <section id="lookup-result" class="card ticket-result hidden">
+      <div class="ticket-banner">
+        <strong>Thẻ lên xe điện tử (E-Ticket)</strong>
+        <span id="res-code" class="ticket-code-pill">#BG0000</span>
+      </div>
 
-    <footer id="app-footer"></footer>
+      <div class="ticket-body">
+        <div class="qr-box">
+          <div id="lookup-qr"></div>
+          <small>Đưa mã này khi lên xe</small>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
-    <script src="../js/config.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/utils.js"></script>
-    <script src="../js/layout.js"></script>
-    <script src="../js/pages/booking-lookup.js"></script>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span id="res-status" class="badge">Đang kiểm tra</span>
+            <strong id="res-total" style="font-size: 20px; color: var(--color-accent);">0đ</strong>
+          </div>
 
+          <div class="route-headline">
+            <span id="res-origin">---</span>
+            <span style="color: var(--color-accent);">→</span>
+            <span id="res-destination">---</span>
+          </div>
+
+          <div class="info-tiles">
+            <div class="info-tile">
+              <span>Giờ khởi hành</span>
+              <strong id="res-departure">---</strong>
+            </div>
+            <div class="info-tile">
+              <span>Điểm đón</span>
+              <strong id="res-pickup">---</strong>
+            </div>
+            <div class="info-tile">
+              <span>Điểm trả</span>
+              <strong id="res-dropoff">---</strong>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ghế</th>
+                  <th>Hành khách</th>
+                  <th>Số điện thoại</th>
+                </tr>
+              </thead>
+              <tbody id="res-passengers-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-footer">
+        <div style="font-size: 14px;">
+          Ghế đã đặt: <strong id="res-seats">---</strong>
+        </div>
+        <a id="res-detail-link" href="#" class="btn btn-primary">
+          Xem chi tiết & In vé
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/booking-lookup.js"></script>
 </body>
 </html>

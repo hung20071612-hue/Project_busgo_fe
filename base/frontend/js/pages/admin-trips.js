@@ -1,221 +1,286 @@
-const adminForm = document.getElementById("admin-trip-form");
-const adminMessage = document.getElementById("admin-page-message");
-const adminFeedback = document.getElementById("admin-form-feedback");
-const conflictAlert = document.getElementById("conflict-alert");
-const conflictMessage = document.getElementById("conflict-message");
-const adminSubmit = document.getElementById("admin-submit");
-const tripList = document.getElementById("admin-trip-list");
-const tripListStatus = document.getElementById("trip-list-status");
-const routeSelect = document.getElementById("admin-route");
-const busSelect = document.getElementById("admin-bus");
-const driverSelect = document.getElementById("admin-driver");
-const departureInput = document.getElementById("admin-departure");
-const arrivalInput = document.getElementById("admin-arrival");
-const optionsByRoute = new Map();
-let routes = [];
-let buses = [];
-let drivers = [];
-let scheduledTrips = [];
+(() => {
+  const BASE_API = (typeof API_BASE_URL !== 'undefined' && API_BASE_URL)
+    ? API_BASE_URL
+    : 'http://127.0.0.1:8000/api';
 
-function adminLocalIsoDate() {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-}
+  let tripsList = [];
+  let routesList = [];
+  let busesList = [];
+  let driversList = [];
+  let keyword = '';
+  let dateFilter = '';
 
-function routeName(routeId) {
-  const route = optionsByRoute.get(Number(routeId));
-  return route ? `${route.origin} → ${route.destination}` : `Tuyến ${routeId}`;
-}
+  function getId(obj, altKey = 'trip_id') {
+    return obj?.id ?? obj?.[altKey] ?? null;
+  }
 
-function setAdminFeedback(message) {
-  adminFeedback.textContent = message;
-  adminFeedback.hidden = !message;
-}
+  function formatVND(amount) {
+    if (typeof formatCurrency === 'function') return formatCurrency(amount);
+    return Number(amount || 0).toLocaleString('vi-VN') + 'đ';
+  }
 
-function fillSelect(select, items, label, makeLabel) {
-  select.replaceChildren(new Option(`Chọn ${label}`, ""));
-  items.forEach((item) => select.add(new Option(makeLabel(item), item.id)));
-  select.disabled = items.length === 0;
-}
+  function formatDateTimeVN(isoStr) {
+    if (!isoStr) return '---';
+    const d = new Date(isoStr);
+    if (Number.isNaN(d.getTime())) return isoStr;
+    return d.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
 
-async function loadOptions() {
-  try {
-    const options = await api.get("/trips/options");
-    routes = options.routes || [];
-    buses = options.buses || [];
-    drivers = options.drivers || [];
-    routes.forEach((route) => optionsByRoute.set(Number(route.id), route));
-    fillSelect(routeSelect, routes, "tuyến đường", (route) => `${route.origin} → ${route.destination}`);
-    fillSelect(busSelect, buses, "phương tiện", (bus) => `${bus.plate_number} · ${bus.seat_count} chỗ`);
-    fillSelect(driverSelect, drivers, "tài xế", (driver) => driver.full_name);
-    fillSelect(document.getElementById("filter-route"), routes, "tuyến", (route) => `${route.origin} → ${route.destination}`);
-    adminMessage.className = routes.length && buses.length && drivers.length ? "status status-ok" : "status status-loading";
-    adminMessage.textContent = routes.length && buses.length && drivers.length
-      ? `Đã tải ${routes.length} tuyến, ${buses.length} phương tiện và ${drivers.length} tài xế đang hoạt động.`
-      : "Chưa có đủ tuyến, xe hoặc tài xế đang hoạt động để tạo chuyến.";
-  } catch (error) {
-    [routeSelect, busSelect, driverSelect].forEach((select) => {
-      select.replaceChildren(new Option("Chưa tải được dữ liệu", ""));
-      select.disabled = true;
+  function toDatetimeLocalValue(isoStr) {
+    if (!isoStr) return '';
+    const d = new Date(isoStr);
+    if (Number.isNaN(d.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  async function fetchJson(url, options = {}) {
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try {
+        const err = await res.json();
+        msg = err.detail || msg;
+      } catch (_) {}
+      throw new Error(msg);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  function getStatusBadge(status) {
+    const st = String(status || 'SCHEDULED').toUpperCase();
+    if (st === 'DEPARTED') return `<span class="px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold">Đã xuất bến</span>`;
+    if (st === 'COMPLETED') return `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold">Hoàn thành</span>`;
+    if (st === 'CANCELLED') return `<span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold">Đã hủy</span>`;
+    return `<span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">Đang mở bán</span>`;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('trips-tbody');
+    const filtered = tripsList.filter((t) => {
+      if (dateFilter && !String(t.departure_time || '').startsWith(dateFilter)) return false;
+      if (!keyword) return true;
+      const route = routesList.find((r) => String(getId(r, 'route_id')) === String(t.route_id)) || {};
+      const routeText = `${t.origin || route.origin || ''} ${t.destination || route.destination || ''}`.toLowerCase();
+      const plate = String(t.license_plate || t.bus_plate || '').toLowerCase();
+      return routeText.includes(keyword) || plate.includes(keyword);
     });
-    adminMessage.className = "status status-error";
-    adminMessage.textContent = `Không tải được danh sách tuyến, xe và tài xế. ${error.message || "Hãy kiểm tra backend."}`;
-  }
-}
 
-function tripOverlaps(trip, departure, arrival) {
-  return trip.status !== "CANCELLED" && new Date(trip.departure_at) < arrival && new Date(trip.arrival_at) > departure;
-}
+    document.getElementById('trip-count').textContent = filtered.length;
 
-function findFormConflicts() {
-  const busId = Number(busSelect.value);
-  const driverId = Number(driverSelect.value);
-  const departureValue = departureInput.value;
-  const arrivalValue = arrivalInput.value;
-  const repeatDaily = document.getElementById("admin-repeat").value === "daily";
-  if (!busId || !driverId || !departureValue || !arrivalValue) {
-    conflictAlert.hidden = true;
-    return [];
-  }
-  const start = new Date(departureValue);
-  const end = new Date(arrivalValue);
-  if (end <= start) {
-    conflictAlert.hidden = true;
-    return [];
-  }
-
-  const conflictDays = [];
-  for (let offset = 0; offset < (repeatDaily ? 7 : 1); offset += 1) {
-    const dayStart = new Date(start.getTime() + offset * 86400000);
-    const dayEnd = new Date(end.getTime() + offset * 86400000);
-    const conflicting = scheduledTrips.filter((trip) => (Number(trip.bus_id) === busId || Number(trip.driver_id) === driverId) && tripOverlaps(trip, dayStart, dayEnd));
-    if (conflicting.length) conflictDays.push({ date: dayStart.toLocaleDateString("vi-VN"), trips: conflicting });
-  }
-  if (conflictDays.length) {
-    const lines = conflictDays.slice(0, 3).map(({ date, trips }) => `${date}: ${trips.map((trip) => `${Number(trip.bus_id) === busId ? "xe" : "tài xế"} trùng chuyến #${trip.id} (${routeName(trip.route_id)})`).join(", ")}`);
-    conflictMessage.textContent = lines.join(" · ");
-    conflictAlert.hidden = false;
-  } else {
-    conflictAlert.hidden = true;
-  }
-  return conflictDays;
-}
-
-function renderSchedule() {
-  const selectedDate = document.getElementById("filter-date").value;
-  const selectedRoute = document.getElementById("filter-route").value;
-  const filtered = scheduledTrips.filter((trip) => {
-    const dateMatches = !selectedDate || String(trip.departure_at).slice(0, 10) === selectedDate;
-    const routeMatches = !selectedRoute || Number(trip.route_id) === Number(selectedRoute);
-    return dateMatches && routeMatches;
-  });
-  tripListStatus.textContent = `${filtered.length} chuyến xe${selectedDate ? ` · ngày ${new Date(`${selectedDate}T00:00:00`).toLocaleDateString("vi-VN")}` : ""}`;
-  if (!filtered.length) {
-    tripList.innerHTML = `<div class="empty-schedule"><span>⌁</span><strong>Chưa có chuyến phù hợp</strong><p>Thử thay đổi bộ lọc hoặc tạo một chuyến mới.</p></div>`;
-    return;
-  }
-  tripList.innerHTML = filtered.map((trip) => {
-    const departure = new Date(trip.departure_at);
-    const arrival = new Date(trip.arrival_at);
-    const weekday = departure.toLocaleDateString("vi-VN", { weekday: "short" });
-    const state = trip.status === "CANCELLED" ? "Đã hủy" : trip.status === "DEPARTED" ? "Đã khởi hành" : "Đã lên lịch";
-    const stateClass = trip.status === "CANCELLED" ? "schedule-status-cancelled" : "schedule-status-active";
-    return `<article class="schedule-row"><div class="schedule-date-badge"><strong>${escapeHtml(departure.toLocaleDateString("vi-VN", { day: "2-digit" }))}</strong><span>${escapeHtml(weekday)}</span></div><div class="schedule-route"><strong>${escapeHtml(routeName(trip.route_id))}</strong><span>${escapeHtml(departure.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }))} – ${escapeHtml(arrival.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }))}</span></div><div class="schedule-resources"><span>Xe #${escapeHtml(trip.bus_id)}</span><span>Tài xế #${escapeHtml(trip.driver_id)}</span></div><strong class="schedule-price">${escapeHtml(formatMoney(trip.ticket_price))}</strong><span class="schedule-status ${stateClass}">${escapeHtml(state)}</span></article>`;
-  }).join("");
-}
-
-async function loadTrips() {
-  tripListStatus.textContent = "Đang tải lịch trình…";
-  try {
-    scheduledTrips = await api.get("/trips");
-    renderSchedule();
-    findFormConflicts();
-  } catch (error) {
-    tripListStatus.textContent = "Không tải được danh sách chuyến.";
-    tripList.innerHTML = `<div class="empty-schedule"><strong>Không thể tải lịch trình</strong><p>${escapeHtml(error.message || "Vui lòng kiểm tra backend.")}</p></div>`;
-  }
-}
-
-document.getElementById("focus-create").addEventListener("click", () => document.getElementById("create-trip-section").scrollIntoView({ behavior: "smooth" }));
-document.getElementById("refresh-trips").addEventListener("click", loadTrips);
-document.getElementById("filter-date").addEventListener("change", renderSchedule);
-document.getElementById("filter-route").addEventListener("change", renderSchedule);
-document.querySelectorAll("#admin-trip-form select, #admin-trip-form input").forEach((field) => field.addEventListener("change", findFormConflicts));
-busSelect.addEventListener("change", () => {
-  const bus = buses.find((item) => Number(item.id) === Number(busSelect.value));
-  document.getElementById("bus-seat-hint").textContent = bus ? `Sức chứa ${bus.seat_count} hành khách.` : "";
-});
-
-adminForm.addEventListener("reset", () => {
-  setTimeout(() => {
-    setAdminFeedback("");
-    conflictAlert.hidden = true;
-    document.getElementById("bus-seat-hint").textContent = "";
-  });
-});
-
-adminForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  setAdminFeedback("");
-  const form = new FormData(adminForm);
-  const departureAt = String(form.get("departure_at") || "");
-  const arrivalAt = String(form.get("arrival_at") || "");
-  if (!form.get("route_id") || !form.get("bus_id") || !form.get("driver_id") || !departureAt || !arrivalAt || !form.get("ticket_price")) {
-    setAdminFeedback("Vui lòng điền đầy đủ các trường bắt buộc.");
-    return;
-  }
-  if (new Date(arrivalAt) <= new Date(departureAt)) {
-    setAdminFeedback("Giờ đến dự kiến phải sau giờ khởi hành.");
-    return;
-  }
-  const repeat = form.get("repeat") === "daily";
-  const conflicts = findFormConflicts();
-  if (conflicts.length && !repeat) {
-    setAdminFeedback("Hãy đổi xe, tài xế hoặc thời gian trước khi lưu chuyến.");
-    return;
-  }
-  const payload = {
-    route_id: Number(form.get("route_id")),
-    bus_id: Number(form.get("bus_id")),
-    driver_id: Number(form.get("driver_id")),
-    departure_at: departureAt,
-    arrival_at: arrivalAt,
-    ticket_price: Number(form.get("ticket_price")),
-  };
-  adminSubmit.disabled = true;
-  adminSubmit.textContent = "Đang lưu…";
-  try {
-    const result = await api.post(repeat ? "/trips/repeat" : "/trips", payload);
-    const createdCount = repeat ? result.created.length : 1;
-    const skippedCount = repeat ? result.skipped.length : 0;
-    adminMessage.className = "status status-ok";
-    adminMessage.textContent = repeat
-      ? `Đã tạo ${createdCount} chuyến${skippedCount ? `; bỏ qua ${skippedCount} ngày do trùng lịch` : ""}.`
-      : "Đã tạo chuyến xe thành công.";
-    if (repeat && skippedCount) {
-      const firstSkipped = result.skipped[0];
-      const details = (firstSkipped.conflicts || []).map((item) => `${item.resource === "bus" ? "xe" : "tài xế"} trùng chuyến #${item.trip_id}`).join(", ");
-      setAdminFeedback(`Một số ngày không thể tạo do trùng lịch${details ? `: ${details}` : "."}`);
-    } else {
-      adminForm.reset();
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-400">Không tìm thấy chuyến xe phù hợp.</td></tr>`;
+      return;
     }
-    await loadTrips();
-  } catch (error) {
-    if (error.status === 409) {
-      conflictMessage.textContent = error.message;
-      conflictAlert.hidden = false;
-      setAdminFeedback("Lịch trình vừa được cập nhật ở nơi khác. Hãy kiểm tra lại trước khi lưu.");
-    } else {
-      setAdminFeedback(error.message || "Chưa thể lưu chuyến xe. Vui lòng thử lại.");
-    }
-  } finally {
-    adminSubmit.disabled = false;
-    adminSubmit.innerHTML = 'Lưu chuyến xe <span aria-hidden="true">→</span>';
-  }
-});
 
-const minimumDateTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-departureInput.min = minimumDateTime;
-arrivalInput.min = minimumDateTime;
-document.getElementById("filter-date").value = adminLocalIsoDate();
-loadOptions().then(loadTrips);
+    tbody.innerHTML = filtered.map((t) => {
+      const id = getId(t, 'trip_id');
+      const route = routesList.find((r) => String(getId(r, 'route_id')) === String(t.route_id)) || {};
+      const bus = busesList.find((b) => String(getId(b, 'bus_id')) === String(t.bus_id)) || {};
+      const driver = driversList.find((d) => String(getId(d, 'driver_id')) === String(t.driver_id)) || {};
+
+      const origin = t.origin || route.origin || 'Điểm đi';
+      const dest = t.destination || route.destination || 'Điểm đến';
+      const plate = t.license_plate || bus.license_plate || (t.bus_id ? `Xe #${t.bus_id}` : 'Chưa gán xe');
+      const driverName = t.driver_name || driver.full_name || (t.driver_id ? `Tài xế #${t.driver_id}` : 'Chưa gán tài xế');
+      const price = formatVND(t.price ?? t.ticket_price ?? route.base_price ?? 0);
+
+      return `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-5 py-3.5 font-mono text-xs font-bold text-slate-600">#TR-${id}</td>
+          <td class="px-5 py-3.5 font-semibold text-slate-900">${origin} → ${dest}</td>
+          <td class="px-5 py-3.5 text-slate-700 font-medium">${formatDateTimeVN(t.departure_time)}</td>
+          <td class="px-5 py-3.5">
+            <div class="text-xs font-bold text-slate-800">${plate}</div>
+            <div class="text-xs text-slate-500">${driverName}</div>
+          </td>
+          <td class="px-5 py-3.5 font-display font-bold text-brand-600">${price}</td>
+          <td class="px-5 py-3.5">${getStatusBadge(t.status)}</td>
+          <td class="px-5 py-3.5 text-right space-x-1.5">
+            <button type="button" data-action="edit" data-id="${id}" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition">
+              Sửa
+            </button>
+            <button type="button" data-action="delete" data-id="${id}" class="px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-semibold text-rose-600 transition">
+              Xóa
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function populateDropdowns() {
+    const routeSel = document.getElementById('select-route');
+    routeSel.innerHTML = `<option value="">-- Chọn tuyến đường --</option>` + routesList.map((r) => {
+      const id = getId(r, 'route_id');
+      return `<option value="${id}" data-price="${r.base_price ?? 0}">${r.origin || 'Điểm đi'} → ${r.destination || 'Điểm đến'} (${formatVND(r.base_price ?? 0)})</option>`;
+    }).join('');
+
+    const busSel = document.getElementById('select-bus');
+    busSel.innerHTML = `<option value="">-- Chọn xe (tùy chọn) --</option>` + busesList.map((b) => {
+      const id = getId(b, 'bus_id');
+      return `<option value="${id}">${b.license_plate || `Xe #${id}`}</option>`;
+    }).join('');
+
+    const driverSel = document.getElementById('select-driver');
+    driverSel.innerHTML = `<option value="">-- Chọn tài xế (tùy chọn) --</option>` + driversList.map((d) => {
+      const id = getId(d, 'driver_id');
+      return `<option value="${id}">${d.full_name || `Tài xế #${id}`} (${d.phone || ''})</option>`;
+    }).join('');
+  }
+
+  function openModal(trip = null) {
+    const modal = document.getElementById('trip-modal');
+    const titleEl = document.getElementById('trip-modal-title');
+    const idInput = document.getElementById('edit-trip-id');
+
+    if (trip) {
+      const id = getId(trip, 'trip_id');
+      titleEl.textContent = `Cập nhật chuyến xe #TR-${id}`;
+      idInput.value = id;
+      document.getElementById('select-route').value = trip.route_id || '';
+      document.getElementById('select-bus').value = trip.bus_id || '';
+      document.getElementById('select-driver').value = trip.driver_id || '';
+      document.getElementById('input-departure').value = toDatetimeLocalValue(trip.departure_time);
+      document.getElementById('input-arrival').value = toDatetimeLocalValue(trip.arrival_time);
+      document.getElementById('input-trip-price').value = trip.price ?? trip.ticket_price ?? '';
+      document.getElementById('select-trip-status').value = String(trip.status || 'SCHEDULED').toUpperCase();
+    } else {
+      titleEl.textContent = 'Mở chuyến xe mới';
+      idInput.value = '';
+      document.getElementById('trip-form').reset();
+      document.getElementById('select-trip-status').value = 'SCHEDULED';
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('trip-modal').classList.add('hidden');
+  }
+
+  async function loadAll() {
+    try {
+      const [tData, rData, bData, dData] = await Promise.all([
+        fetchJson(`${BASE_API}/trips`),
+        fetchJson(`${BASE_API}/routes`).catch(() => []),
+        fetchJson(`${BASE_API}/buses`).catch(() => []),
+        fetchJson(`${BASE_API}/drivers`).catch(() => []),
+      ]);
+
+      tripsList = Array.isArray(tData) ? tData : (tData.trips || tData.items || []);
+      routesList = Array.isArray(rData) ? rData : (rData.routes || rData.items || []);
+      busesList = Array.isArray(bData) ? bData : (bData.buses || bData.items || []);
+      driversList = Array.isArray(dData) ? dData : (dData.drivers || dData.items || []);
+
+      populateDropdowns();
+      renderTable();
+    } catch (err) {
+      document.getElementById('trips-tbody').innerHTML =
+        `<tr><td colspan="7" class="px-5 py-8 text-center text-rose-600">Lỗi tải danh sách chuyến xe: ${err.message}</td></tr>`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAll();
+
+    document.getElementById('trip-search').addEventListener('input', (e) => {
+      keyword = e.target.value.trim().toLowerCase();
+      renderTable();
+    });
+
+    document.getElementById('trip-filter-date').addEventListener('change', (e) => {
+      dateFilter = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('btn-clear-date').addEventListener('click', () => {
+      dateFilter = '';
+      document.getElementById('trip-filter-date').value = '';
+      renderTable();
+    });
+
+    // Tự gợi ý giá vé theo tuyến đường được chọn
+    document.getElementById('select-route').addEventListener('change', (e) => {
+      const opt = e.target.selectedOptions[0];
+      const priceInput = document.getElementById('input-trip-price');
+      if (opt && opt.dataset.price && !priceInput.value) {
+        priceInput.value = opt.dataset.price;
+      }
+    });
+
+    document.getElementById('btn-new-trip').addEventListener('click', () => openModal(null));
+    document.getElementById('btn-close-trip-modal').addEventListener('click', closeModal);
+    document.getElementById('btn-cancel-trip').addEventListener('click', closeModal);
+
+    document.getElementById('trips-tbody').addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const trip = tripsList.find((t) => String(getId(t, 'trip_id')) === String(id));
+
+      if (btn.dataset.action === 'edit' && trip) {
+        openModal(trip);
+      } else if (btn.dataset.action === 'delete') {
+        if (!confirm(`Xóa chuyến xe #TR-${id}?`)) return;
+        try {
+          await fetchJson(`${BASE_API}/trips/${id}`, { method: 'DELETE' });
+          tripsList = tripsList.filter((t) => String(getId(t, 'trip_id')) !== String(id));
+          renderTable();
+        } catch (err) {
+          alert(`Xóa chuyến thất bại: ${err.message}`);
+        }
+      }
+    });
+
+    document.getElementById('trip-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById('edit-trip-id').value;
+      const routeId = Number(document.getElementById('select-route').value);
+      const busVal = document.getElementById('select-bus').value;
+      const driverVal = document.getElementById('select-driver').value;
+      const departureTime = document.getElementById('input-departure').value;
+      const arrivalTime = document.getElementById('input-arrival').value || null;
+      const price = Number(document.getElementById('input-trip-price').value) || 0;
+      const status = document.getElementById('select-trip-status').value;
+
+      const selectedRoute = routesList.find((r) => String(getId(r, 'route_id')) === String(routeId)) || {};
+
+      const payload = {
+        route_id: routeId,
+        origin: selectedRoute.origin,
+        destination: selectedRoute.destination,
+        bus_id: busVal ? Number(busVal) : null,
+        driver_id: driverVal ? Number(driverVal) : null,
+        departure_time: departureTime,
+        arrival_time: arrivalTime,
+        price,
+        status,
+      };
+
+      const saveBtn = document.getElementById('btn-save-trip');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Đang lưu...';
+
+      try {
+        if (editId) {
+          await fetchJson(`${BASE_API}/trips/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+        } else {
+          await fetchJson(`${BASE_API}/trips`, { method: 'POST', body: JSON.stringify(payload) });
+        }
+        closeModal();
+        await loadAll();
+      } catch (err) {
+        alert(`Lưu chuyến xe thất bại: ${err.message}`);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Lưu chuyến xe';
+      }
+    });
+  });
+})();

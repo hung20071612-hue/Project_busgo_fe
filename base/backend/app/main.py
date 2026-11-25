@@ -10,9 +10,6 @@ from app import models
 from app.core.config import settings
 from app.core.exceptions import global_exception_handler
 from app.db.session import Base, engine
-<<<<<<< Updated upstream
-from app.routers import auth_router, check_bookings, health, routes, stations, trips, user
-=======
 from app.routers import (
     admin_users,
     auth_router,
@@ -32,13 +29,10 @@ from app.routers import (
     trips,
     user,
 )
->>>>>>> Stashed changes
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Tự tạo các bảng còn thiếu khi server khởi động (bảng đã có thì bỏ qua).
-    # Lưu ý: create_all KHÔNG sửa bảng đã tồn tại. Đổi cột -> sửa bằng SQL hoặc xoá bảng tạo lại.
     try:
         Base.metadata.create_all(bind=engine)
         print(f"[DB] Đã kết nối MySQL {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
@@ -52,7 +46,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
-# Rate limit & Global Exception Handler
 app.state.limiter = auth_router.limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_exception_handler(Exception, global_exception_handler)
@@ -67,6 +60,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api")
 app.include_router(auth_router.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
+app.include_router(trip_seats.router, prefix="/api")
 app.include_router(seat_hold.router, prefix="/api")
 app.include_router(bookings.router, prefix="/api")
 app.include_router(cancel_booking.router, prefix="/api")
@@ -75,14 +69,11 @@ app.include_router(payments.router, prefix="/api")
 app.include_router(trips.router, prefix="/api")
 app.include_router(stations.router, prefix="/api/admin")
 app.include_router(routes.router, prefix="/api/admin")
-<<<<<<< Updated upstream
-=======
 app.include_router(buses.router, prefix="/api/admin")
 app.include_router(bus_types.router, prefix="/api/admin")
 app.include_router(driver.router, prefix="/api/admin")
 app.include_router(admin_users.router, prefix="/api/admin")
 app.include_router(statistics.router, prefix="/api/admin")
->>>>>>> Stashed changes
 
 
 @app.get("/")
