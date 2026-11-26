@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chọn ghế | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/booking-flow.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <nav class="breadcrumbs" aria-label="Điều hướng">
+      <a href="../index.html">Trang chủ</a><span>›</span>
+      <a href="trips.html">Tìm chuyến</a><span>›</span>
+      <span>Chọn ghế</span>
+    </nav>
+
+    <ol class="booking-stepper">
+      <li class="step-item active"><span class="step-num">1</span><span>Chọn ghế</span></li>
+      <li class="step-line"></li>
+      <li class="step-item"><span class="step-num">2</span><span>Thông tin hành khách</span></li>
+      <li class="step-line"></li>
+      <li class="step-item"><span class="step-num">3</span><span>Thanh toán</span></li>
+      <li class="step-line"></li>
+      <li class="step-item"><span class="step-num">4</span><span>Xác nhận vé</span></li>
+    </ol>
+
+    <div class="flow-grid">
+      <section>
+        <div class="card" style="margin-bottom: 16px;">
+          <span class="eyebrow">SƠ ĐỒ GHẾ TRỰC TIẾP</span>
+          <h1 id="busTitle" style="margin: 2px 0 4px;">Chọn ghế trên xe</h1>
+          <p id="busSubtitle" class="muted" style="margin: 0;">Đang tải sơ đồ ghế...</p>
+        </div>
+
+        <div class="seat-legend">
+          <div class="legend-item"><span class="legend-box"></span><span>Ghế trống</span></div>
+          <div class="legend-item"><span class="legend-box selected"></span><span>Đang chọn</span></div>
+          <div class="legend-item"><span class="legend-box held"></span><span>Người khác đang giữ</span></div>
+          <div class="legend-item"><span class="legend-box booked"></span><span>Đã đặt</span></div>
+        </div>
+
+        <div id="seatMap">
+          <div class="card muted" style="text-align:center;">Đang tải dữ liệu sơ đồ ghế...</div>
+        </div>
+      </section>
+
+      <aside class="sticky-aside">
+        <div id="timerCard" class="timer-banner" hidden>
+          <div class="timer-top">
+            <strong style="font-size:13px; color:#9a3412;">THỜI GIAN GIỮ GHẾ</strong>
+            <span id="timerText" class="timer-digits">10:00</span>
+          </div>
+          <div class="timer-bar-bg">
+            <div id="timerBar" class="timer-bar-fill" style="width:100%;"></div>
+          </div>
+          <p class="muted" style="font-size:12px; margin:8px 0 0; color:#9a3412;">
+            Ghế sẽ tự động được nhả nếu hết thời gian giữ chỗ.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Thông tin đặt chỗ</h2>
+          <div class="summary-row">
+            <span class="muted">Tuyến đường</span>
+            <strong id="sumRoute">—</strong>
+          </div>
+          <div class="summary-row">
+            <span class="muted">Khởi hành</span>
+            <strong id="sumDeparture">—</strong>
+          </div>
+          <div class="summary-row">
+            <span class="muted">Biển số xe</span>
+            <strong id="sumPlate">—</strong>
+          </div>
+          <div class="summary-row">
+            <span class="muted">Giá vé / ghế</span>
+            <strong id="sumUnitPrice">—</strong>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div class="muted" style="font-size: 13px; margin-bottom: 6px;">Ghế đã chọn (tối đa 5 ghế):</div>
+            <div id="selectedSeatList"><span class="muted">Chưa chọn ghế nào</span></div>
+          </div>
+
+          <div class="summary-row" style="margin-top: 14px; padding-top: 12px; border-top: 2px solid var(--color-border);">
+            <strong>Tổng tạm tính</strong>
+            <strong id="sumTotal" style="font-size: 20px; color: #ea580c;">0 ₫</strong>
+          </div>
+
+          <div class="form-actions" style="flex-direction: column;">
+            <button id="continueBtn" type="button" class="btn btn-accent w-full" style="padding: 12px;" disabled>
+              Tiếp tục nhập hành khách →
+            </button>
+            <button id="releaseAllBtn" type="button" class="btn btn-danger w-full" hidden>
+              Bỏ chọn tất cả ghế
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/seat-selection.js"></script>
+</body>
+</html>

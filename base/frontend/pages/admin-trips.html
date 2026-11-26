@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý chuyến xe - BusGo Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: { brand: { 50: '#FFF7ED', 100: '#FFEDD5', 500: '#F97316', 600: '#EA580C', 700: '#C2410C' } }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 font-sans antialiased min-h-screen flex">
+
+  <!-- Admin Sidebar -->
+  <aside class="w-64 bg-slate-900 text-slate-300 hidden lg:flex flex-col shrink-0">
+    <div class="h-16 px-6 flex items-center gap-2.5 border-b border-slate-800">
+      <div class="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center">
+        <span class="material-symbols-outlined text-[22px]">directions_bus</span>
+      </div>
+      <div>
+        <span class="font-display font-extrabold text-lg text-white tracking-tight">Bus<span class="text-brand-500">Go</span></span>
+        <span class="block text-[10px] uppercase tracking-widest text-slate-400">Admin Portal</span>
+      </div>
+    </div>
+
+    <nav class="flex-1 px-3 py-5 space-y-1 text-sm font-medium">
+      <a href="admin-dashboard.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+        Tổng quan hệ thống
+      </a>
+      <a href="admin-routes.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">alt_route</span>
+        Quản lý tuyến đường
+      </a>
+      <a href="admin-trips.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold shadow-sm">
+        <span class="material-symbols-outlined text-[20px]">departure_board</span>
+        Quản lý chuyến xe
+      </a>
+      <a href="admin-seat-maps.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">event_seat</span>
+        Loại xe & Sơ đồ ghế
+      </a>
+      <a href="admin-users.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+        <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+        Người dùng & Tài xế
+      </a>
+      <div class="pt-4 mt-4 border-t border-slate-800 space-y-1">
+        <a href="profile.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+          <span class="material-symbols-outlined text-[20px]">account_circle</span>
+          Hồ sơ cá nhân
+        </a>
+        <a href="staff-passengers.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+          <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+          Cổng soát vé Staff
+        </a>
+        <a href="../index.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+          <span class="material-symbols-outlined text-[20px]">storefront</span>
+          Về trang đặt vé
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 h-16 px-4 sm:px-8 flex items-center justify-between">
+      <h1 class="font-display font-bold text-lg sm:text-xl text-slate-900">Lập lịch & Điều phối chuyến xe</h1>
+      <button id="btn-new-trip" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-xs transition">
+        <span class="material-symbols-outlined text-[19px]">add</span>
+        Mở chuyến mới
+      </button>
+    </header>
+
+    <main class="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-5">
+      <!-- Filter Bar -->
+      <div class="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center shadow-xs">
+        <div class="sm:col-span-5 relative">
+          <span class="material-symbols-outlined text-slate-400 text-[19px] absolute left-3 top-1/2 -translate-y-1/2">search</span>
+          <input id="trip-search" type="text" placeholder="Tìm tuyến đường, biển số xe..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:border-brand-500" />
+        </div>
+        <div class="sm:col-span-3">
+          <input id="trip-filter-date" type="date" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:border-brand-500" />
+        </div>
+        <div class="sm:col-span-4 flex items-center justify-between sm:justify-end gap-3">
+          <button id="btn-clear-date" type="button" class="text-xs font-semibold text-slate-500 hover:text-brand-600">Xem tất cả ngày</button>
+          <span class="text-xs text-slate-500">Tổng: <strong id="trip-count" class="text-slate-900">0</strong> chuyến</span>
+        </div>
+      </div>
+
+      <!-- Trips Table -->
+      <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+              <tr>
+                <th class="px-5 py-3.5 font-semibold">Mã chuyến</th>
+                <th class="px-5 py-3.5 font-semibold">Tuyến đường</th>
+                <th class="px-5 py-3.5 font-semibold">Khởi hành</th>
+                <th class="px-5 py-3.5 font-semibold">Phương tiện / Tài xế</th>
+                <th class="px-5 py-3.5 font-semibold">Giá vé</th>
+                <th class="px-5 py-3.5 font-semibold">Trạng thái</th>
+                <th class="px-5 py-3.5 font-semibold text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="trips-tbody" class="divide-y divide-slate-100">
+              <tr><td colspan="7" class="px-5 py-8 text-center text-slate-400">Đang tải danh sách chuyến xe...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create/Edit Trip Modal -->
+  <div id="trip-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 id="trip-modal-title" class="font-display font-bold text-lg text-slate-900">Mở chuyến xe mới</h3>
+        <button type="button" id="btn-close-trip-modal" class="text-slate-400 hover:text-slate-600">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="trip-form" class="space-y-4">
+        <input type="hidden" id="edit-trip-id" />
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tuyến đường khai thác *</label>
+          <select id="select-route" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+            <option value="">-- Chọn tuyến đường --</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Xe điều hành</label>
+            <select id="select-bus" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+              <option value="">-- Chọn xe (tùy chọn) --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tài xế phụ trách</label>
+            <select id="select-driver" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+              <option value="">-- Chọn tài xế (tùy chọn) --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Giờ xuất bến *</label>
+            <input id="input-departure" type="datetime-local" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Giờ đến dự kiến</label>
+            <input id="input-arrival" type="datetime-local" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Giá vé áp dụng (VNĐ) *</label>
+            <input id="input-trip-price" type="number" min="0" step="1000" required placeholder="450000" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Trạng thái chuyến</label>
+            <select id="select-trip-status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-brand-500">
+              <option value="SCHEDULED">Đang mở bán (SCHEDULED)</option>
+              <option value="DEPARTED">Đã xuất bến (DEPARTED)</option>
+              <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
+              <option value="CANCELLED">Hủy chuyến (CANCELLED)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" id="btn-cancel-trip" class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-medium text-slate-700">Hủy</button>
+          <button type="submit" id="btn-save-trip" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition">Lưu chuyến xe</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin-layout.js"></script>
+  <script src="../js/pages/admin-trips.js"></script>
+</body>
+</html>

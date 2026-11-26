@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông tin hành khách | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/booking-flow.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <nav class="breadcrumbs" aria-label="Điều hướng">
+      <a href="../index.html">Trang chủ</a><span>›</span>
+      <a href="trips.html">Tìm chuyến</a><span>›</span>
+      <a id="crumb-seat" href="trips.html">Chọn ghế</a><span>›</span>
+      <span>Thông tin hành khách</span>
+    </nav>
+
+    <ol class="booking-stepper">
+      <li class="step-item done"><span class="step-num">✓</span><span>Chọn ghế</span></li>
+      <li class="step-line"></li>
+      <li class="step-item active"><span class="step-num">2</span><span>Thông tin hành khách</span></li>
+      <li class="step-line"></li>
+      <li class="step-item"><span class="step-num">3</span><span>Thanh toán</span></li>
+      <li class="step-line"></li>
+      <li class="step-item"><span class="step-num">4</span><span>Xác nhận vé</span></li>
+    </ol>
+
+    <div class="flow-grid">
+      <section>
+        <form id="passenger-form" class="card">
+          <span class="eyebrow">BƯỚC 2 / 4</span>
+          <h1>Điểm đón / trả & Thông tin hành khách</h1>
+          <p class="muted">Vui lòng nhập chính xác họ tên và số điện thoại để nhận mã vé điện tử và hỗ trợ lên xe.</p>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+            <div>
+              <label for="pickup">Điểm đón khách *</label>
+              <input id="pickup" name="pickup" type="text" required maxlength="255" placeholder="VD: Bến xe Mỹ Đình">
+            </div>
+            <div>
+              <label for="dropoff">Điểm trả khách *</label>
+              <input id="dropoff" name="dropoff" type="text" required maxlength="255" placeholder="VD: Bến xe Thượng Lý">
+            </div>
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--color-border); margin: 20px 0;">
+
+          <div class="list-header">
+            <h2 style="margin:0;">Danh sách hành khách theo ghế</h2>
+            <button type="button" id="btn-copy-phone" class="btn btn-small">Dùng chung SĐT ghế đầu cho tất cả</button>
+          </div>
+
+          <div id="passenger-fields" style="margin-top: 12px;">
+            <p class="muted">Đang tải thông tin ghế đang giữ...</p>
+          </div>
+
+          <p id="form-error" class="text-error" hidden style="margin-top: 12px;"></p>
+
+          <div class="form-actions" style="justify-content: space-between; margin-top: 20px;">
+            <a id="btn-back-seat" href="trips.html" class="btn">← Quay lại chọn ghế</a>
+            <button id="btn-submit-booking" type="submit" class="btn btn-accent" style="padding: 10px 22px;">
+              Xác nhận & Sang thanh toán →
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="sticky-aside">
+        <div id="timerCard" class="timer-banner" hidden>
+          <div class="timer-top">
+            <strong style="font-size:13px; color:#9a3412;">THỜI GIAN GIỮ GHẾ</strong>
+            <span id="timerText" class="timer-digits">10:00</span>
+          </div>
+          <div class="timer-bar-bg">
+            <div id="timerBar" class="timer-bar-fill" style="width:100%;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Tóm tắt đơn đặt vé</h2>
+          <div class="summary-row">
+            <span class="muted">Mã phiên giữ</span>
+            <strong id="sumBookingCode">—</strong>
+          </div>
+          <div class="summary-row">
+            <span class="muted">Tuyến đường</span>
+            <strong id="sumRoute">—</strong>
+          </div>
+          <div class="summary-row">
+            <span class="muted">Khởi hành</span>
+            <strong id="sumDeparture">—</strong>
+          </div>
+          <div class="summary-row">
+            <span class="muted">Số lượng ghế</span>
+            <strong id="sumSeatCount">—</strong>
+          </div>
+          <div class="summary-row" style="margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--color-border);">
+            <strong>Tổng thanh toán</strong>
+            <strong id="sumTotal" style="font-size: 20px; color: #ea580c;">—</strong>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/passenger-info.js"></script>
+</body>
+</html>

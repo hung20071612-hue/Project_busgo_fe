@@ -1,0 +1,38 @@
+"""Model = cấu trúc 1 bảng trong MySQL. Bảng mẫu: items.
+
+Khi làm đề tài, copy file này để tạo bảng của nhóm (vd: Product, Order, Movie...).
+"""
+from datetime import datetime
+import enum
+
+from sqlalchemy import DateTime, String, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.session import Base
+
+
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    USER = "user"
+    STAFF = "staff"
+
+
+class UserStatus(str, enum.Enum):
+    ACTIVE = "active"
+    LOCKED = "locked"
+
+
+class UserModel(Base):
+    __tablename__ = "user"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    full_name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    phone: Mapped[str] = mapped_column(String(10), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(60))
+    role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
+    status: Mapped[UserStatus] = mapped_column(default=UserStatus.ACTIVE)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )

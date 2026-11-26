@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán & Xác nhận vé | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/booking-flow.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <ol id="stepper" class="booking-stepper">
+      <li class="step-item done"><span class="step-num">✓</span><span>Chọn ghế</span></li>
+      <li class="step-line"></li>
+      <li class="step-item done"><span class="step-num">✓</span><span>Thông tin hành khách</span></li>
+      <li class="step-line"></li>
+      <li id="stepPay" class="step-item active"><span class="step-num">3</span><span>Thanh toán</span></li>
+      <li class="step-line"></li>
+      <li id="stepDone" class="step-item"><span class="step-num">4</span><span>Xác nhận vé</span></li>
+    </ol>
+
+    <div id="errorBox" class="card" hidden style="text-align:center; padding: 32px;">
+      <h2>Không thể tải đơn đặt vé</h2>
+      <p id="errorText" class="muted"></p>
+      <a id="errorLink" href="trips.html" class="btn btn-primary">Tìm chuyến xe</a>
+    </div>
+
+    <!-- BƯỚC 3: CHỌN PHƯƠNG THỨC THANH TOÁN -->
+    <div id="payView" class="flow-grid" hidden>
+      <section class="card">
+        <span class="eyebrow">BƯỚC 3 / 4</span>
+        <h1>Chọn phương thức thanh toán</h1>
+        <p class="muted">Cổng thanh toán mô phỏng BusGo — xác nhận giao dịch tức thì và xuất vé điện tử.</p>
+
+        <div id="methodList" style="margin-top: 16px;">
+          <label class="pay-method-card" data-method="TRANSFER">
+            <input type="radio" name="pay_method" value="TRANSFER" style="width:auto;">
+            <div>
+              <strong>Chuyển khoản ngân hàng (VietQR 24/7)</strong>
+              <div class="muted" style="font-size: 13px;">Xác nhận tự động ngay sau khi bấm thanh toán.</div>
+            </div>
+          </label>
+
+          <label class="pay-method-card" data-method="WALLET">
+            <input type="radio" name="pay_method" value="WALLET" style="width:auto;">
+            <div>
+              <strong>Ví điện tử (MoMo / ZaloPay / VNPay)</strong>
+              <div class="muted" style="font-size: 13px;">Thanh toán nhanh qua ví điện tử liên kết.</div>
+            </div>
+          </label>
+
+          <label class="pay-method-card" data-method="CASH">
+            <input type="radio" name="pay_method" value="CASH" style="width:auto;">
+            <div>
+              <strong>Tiền mặt tại quầy / Khi lên xe</strong>
+              <div class="muted" style="font-size: 13px;">Xác nhận giữ chỗ ngay, xuất trình mã vé cho nhân viên soát vé.</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-actions" style="justify-content: space-between; margin-top: 20px;">
+          <a id="backLink" href="my-bookings.html" class="btn">← Danh sách vé</a>
+          <button id="payBtn" type="button" class="btn btn-accent" style="padding: 12px 24px;" disabled>
+            Xác nhận thanh toán →
+          </button>
+        </div>
+      </section>
+
+      <aside class="sticky-aside">
+        <div id="timerCard" class="timer-banner" hidden>
+          <div class="timer-top">
+            <strong style="font-size:13px; color:#9a3412;">THỜI GIAN THANH TOÁN</strong>
+            <span id="timerText" class="timer-digits">10:00</span>
+          </div>
+          <div class="timer-bar-bg">
+            <div id="timerBar" class="timer-bar-fill" style="width:100%;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Chi tiết đơn đặt vé</h2>
+          <div class="summary-row"><span class="muted">Mã đơn</span><strong id="sumCode">—</strong></div>
+          <div class="summary-row"><span class="muted">Tuyến</span><strong id="sumRoute">—</strong></div>
+          <div class="summary-row"><span class="muted">Khởi hành</span><strong id="sumDeparture">—</strong></div>
+          <div class="summary-row"><span class="muted">Điểm đón</span><strong id="sumPickup">—</strong></div>
+          <div class="summary-row"><span class="muted">Điểm trả</span><strong id="sumDropoff">—</strong></div>
+          <div style="margin-top: 10px;">
+            <span class="muted" style="font-size: 13px;">Hành khách:</span>
+            <ul id="sumPassengers" style="padding-left: 18px; margin: 6px 0; font-size: 13px;"></ul>
+          </div>
+          <div class="summary-row" style="margin-top: 10px; padding-top: 12px; border-top: 2px solid var(--color-border);">
+            <strong>Tổng cộng</strong>
+            <strong id="sumTotal" style="font-size: 20px; color: #ea580c;">—</strong>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- BƯỚC 4: XÁC NHẬN & VÉ ĐIỆN TỬ QR -->
+    <div id="doneView" hidden>
+      <div id="ticketCard" class="card" style="max-width: 720px; margin: 0 auto;">
+        <div style="text-align: center; padding-bottom: 16px; border-bottom: 1px dashed var(--color-border);">
+          <span class="badge-status badge-paid">THANH TOÁN THÀNH CÔNG</span>
+          <h1 style="margin: 10px 0 4px;">Vé điện tử BusGo (Boarding Pass)</h1>
+          <p class="muted" style="margin:0;">Xuất trình mã QR bên dưới cho nhân viên khi lên xe</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; margin-top: 20px;">
+          <div style="text-align:center; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; background:#fff;">
+            <div id="qrBox" style="display:flex; justify-content:center;"></div>
+            <strong id="ticketCode" style="display:block; margin-top: 8px; font-size: 15px; color:#1e3a8a;">—</strong>
+          </div>
+
+          <div>
+            <div class="summary-row"><span class="muted">Tuyến đường</span><strong id="ticketRoute">—</strong></div>
+            <div class="summary-row"><span class="muted">Giờ khởi hành</span><strong id="ticketDeparture">—</strong></div>
+            <div class="summary-row"><span class="muted">Điểm đón → trả</span><strong id="ticketStops">—</strong></div>
+            <div class="summary-row"><span class="muted">Phương thức TT</span><strong id="ticketMethod">—</strong></div>
+            <div class="summary-row"><span class="muted">Tổng tiền đã thanh toán</span><strong id="ticketTotal" style="color:#16a34a; font-size:18px;">—</strong></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-border);">
+          <strong>Danh sách ghế & hành khách</strong>
+          <ul id="ticketPassengers" style="padding-left: 18px; margin-top: 8px;"></ul>
+        </div>
+
+        <div class="form-actions no-print" style="justify-content: center; margin-top: 20px;">
+          <button type="button" class="btn" onclick="window.print()">In vé / Lưu PDF</button>
+          <a href="my-bookings.html" class="btn btn-primary">Xem Vé của tôi</a>
+          <a href="../index.html" class="btn">Về trang chủ</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/payment.js"></script>
+</body>
+</html>

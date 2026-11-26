@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bến xe & Tuyến đường | BusGo Admin</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/stations-routes.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <section class="card">
+      <h1>Quản lý Bến xe &amp; Tuyến đường</h1>
+      <p class="muted">Thêm / sửa / tìm kiếm / ngừng hoạt động. Cần đăng nhập tài khoản <strong>Admin</strong>.</p>
+
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="routes">Tuyến đường</button>
+        <button type="button" class="tab-btn" data-tab="stations">Bến xe</button>
+      </div>
+
+      <!-- TAB ROUTES -->
+      <div id="panel-routes" class="tab-panel active">
+        <div class="layout-2col">
+          <div>
+            <h2 id="route-form-title">Thêm tuyến mới</h2>
+            <form id="route-form">
+              <label>Mã tuyến *</label>
+              <input name="code" required maxlength="20" placeholder="VD: HN-HP-01">
+
+              <label>Bến đi *</label>
+              <select name="departure_id" id="route-departure" required>
+                <option value="">-- Chọn bến đi --</option>
+              </select>
+
+              <label>Bến đến *</label>
+              <select name="arrival_id" id="route-arrival" required>
+                <option value="">-- Chọn bến đến --</option>
+              </select>
+
+              <label>Quãng đường (km) *</label>
+              <input name="distance_km" type="number" step="0.1" min="0.1" required>
+
+              <label>Thời gian dự kiến (phút) *</label>
+              <input name="estimated_time" type="number" min="1" required>
+
+              <label>Giá cơ bản (VNĐ)</label>
+              <input name="base_price" type="number" min="0" value="0">
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="route-submit">Thêm</button>
+                <button type="button" class="btn" id="route-cancel" hidden>Huỷ</button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <div class="list-header">
+              <h2>Danh sách tuyến</h2>
+              <input id="route-search" type="search" placeholder="Tìm mã tuyến...">
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mã</th>
+                    <th>Đi → Đến</th>
+                    <th>Km</th>
+                    <th>Phút</th>
+                    <th>Giá</th>
+                    <th>TT</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="route-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB STATIONS -->
+      <div id="panel-stations" class="tab-panel">
+        <div class="layout-2col">
+          <div>
+            <h2 id="station-form-title">Thêm bến mới</h2>
+            <form id="station-form">
+              <label>Tên bến *</label>
+              <input name="name" required maxlength="150" placeholder="VD: Bến xe Mỹ Đình">
+
+              <label>Thành phố</label>
+              <input name="city" maxlength="100">
+
+              <label>Địa chỉ</label>
+              <input name="address" maxlength="255">
+
+              <label>Số điện thoại</label>
+              <input name="phone" maxlength="20">
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="station-submit">Thêm</button>
+                <button type="button" class="btn" id="station-cancel" hidden>Huỷ</button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <div class="list-header">
+              <h2>Danh sách bến</h2>
+              <input id="station-search" type="search" placeholder="Tìm tên bến...">
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>TP</th>
+                    <th>SĐT</th>
+                    <th>TT</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="station-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="modal">
+      <h3 id="confirm-title">Xác nhận</h3>
+      <p id="confirm-message" class="muted"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="confirm-cancel">Huỷ</button>
+        <button type="button" class="btn btn-confirm-danger" id="confirm-ok">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/stations-routes.js"></script>
+</body>
+</html>

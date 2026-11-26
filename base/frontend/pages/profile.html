@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ cá nhân | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 820px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .profile-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 16px;
+    }
+    .profile-avatar-lg {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--color-primary, #f97316);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-meta-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .profile-meta-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .profile-actions-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .profile-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 640px) {
+      .profile-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <nav class="breadcrumbs" aria-label="Điều hướng">
+      <a href="../index.html">Trang chủ</a><span>›</span><span>Hồ sơ cá nhân</span>
+    </nav>
+
+    <div class="list-header" style="margin-bottom: 16px;">
+      <div>
+        <span class="eyebrow">TÀI KHOẢN THÀNH VIÊN</span>
+        <h1 style="margin-bottom: 4px;">Hồ sơ cá nhân</h1>
+        <p class="muted" style="margin: 0;">Quản lý thông tin tài khoản, vai trò truy cập và lịch sử đặt vé BusGo.</p>
+      </div>
+      <a class="btn" href="../index.html">← Về trang chủ</a>
+    </div>
+
+    <div id="profile-alert" class="card" hidden style="margin-bottom: 16px;"></div>
+
+    <div class="profile-grid">
+      <!-- Cột trái: Thẻ tóm tắt tài khoản -->
+      <aside class="card">
+        <div class="profile-hero">
+          <div id="profile-avatar" class="profile-avatar-lg">U</div>
+          <div>
+            <h2 id="profile-display-name" style="margin: 0 0 4px;">Đang tải...</h2>
+            <p id="profile-display-email" class="muted" style="margin: 0 0 8px;">---</p>
+            <span id="profile-role-badge" class="badge badge-user">USER</span>
+          </div>
+        </div>
+
+        <ul class="profile-meta-list">
+          <li>
+            <span class="muted">Mã thành viên</span>
+            <strong id="profile-user-id">#---</strong>
+          </li>
+          <li>
+            <span class="muted">Số điện thoại</span>
+            <strong id="profile-display-phone">---</strong>
+          </li>
+          <li>
+            <span class="muted">Trạng thái</span>
+            <strong id="profile-display-status">---</strong>
+          </li>
+          <li>
+            <span class="muted">Ngày tham gia</span>
+            <strong id="profile-created-at">---</strong>
+          </li>
+        </ul>
+
+        <div class="profile-actions-col">
+          <a href="my-bookings.html" class="btn btn-primary btn-block">Xem vé của tôi</a>
+          <!-- <a href="ticket-lookup.html" class="btn btn-block">Tra cứu mã đặt chỗ</a> -->
+          <!-- Chỉ được render bằng JS khi tài khoản có role ADMIN -->
+          <div id="admin-shortcut-slot" style="display: none;"></div>
+          <button type="button" id="btn-profile-logout" class="btn btn-danger btn-block">Đăng xuất tài khoản</button>
+        </div>
+      </aside>
+
+      <!-- Cột phải: Chi tiết & Cập nhật thông tin -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <section class="card">
+          <h2 style="margin-top: 0;">Thông tin cá nhân</h2>
+          <p class="muted" style="margin-top: -6px;">Thông tin được đồng bộ trực tiếp từ hệ thống tài khoản BusGo.</p>
+
+          <form id="profile-update-form" style="margin-top: 14px;">
+            <div class="profile-form-grid">
+              <div class="control-group">
+                <label for="pf-fullname">Họ và tên *</label>
+                <input id="pf-fullname" name="full_name" type="text" required maxlength="100" placeholder="Nhập họ và tên">
+              </div>
+              <div class="control-group">
+                <label for="pf-phone">Số điện thoại *</label>
+                <input id="pf-phone" name="phone" type="tel" required maxlength="15" placeholder="09xxxxxxxx">
+              </div>
+              <div class="control-group">
+                <label for="pf-email">Email đăng nhập</label>
+                <input id="pf-email" name="email" type="email" readonly style="background: #f1f5f9; cursor: not-allowed;">
+              </div>
+              <div class="control-group">
+                <label for="pf-role">Vai trò hệ thống</label>
+                <input id="pf-role" type="text" readonly style="background: #f1f5f9; cursor: not-allowed;">
+              </div>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
+              <button type="submit" id="btn-save-profile" class="btn btn-primary">Lưu thay đổi</button>
+              <span id="profile-save-msg" class="muted" style="font-size: 13px;"></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2 style="margin-top: 0;">Tiện ích nhanh</h2>
+          <div class="features-grid" style="margin-top: 12px;">
+            <div class="feature-card">
+              <h3>Đặt chuyến mới</h3>
+              <p>Tìm tuyến xe khách liên tỉnh và chọn vị trí ghế trực quan theo thời gian thực.</p>
+              <a href="trips.html" class="btn btn-small" style="margin-top: 8px;">Tìm chuyến →</a>
+            </div>
+            <div class="feature-card">
+              <h3>Quản lý vé đã đặt</h3>
+              <p>Xem chi tiết vé điện tử, trạng thái thanh toán hoặc hủy vé theo quy định.</p>
+              <a href="my-bookings.html" class="btn btn-small" style="margin-top: 8px;">Vé của tôi →</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký tài khoản | BusGo</title>
+  <link rel="icon" href="../assets/images/logo.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../">
+  <header id="app-header"></header>
+
+  <main class="container">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1>Tạo tài khoản BusGo</h1>
+          <p>Đăng ký thành viên để đặt vé nhanh và nhận ưu đãi hành trình</p>
+        </div>
+
+        <div id="register-alert" class="status"></div>
+
+        <form id="register-form" novalidate>
+          <div>
+            <label for="full_name">Họ và tên</label>
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              placeholder="Nguyễn Văn A"
+              minlength="5"
+              required
+            >
+            <span class="field-hint">Tối thiểu 5 ký tự</span>
+          </div>
+
+          <div>
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="nguyenvana@gmail.com"
+              autocomplete="email"
+              required
+            >
+          </div>
+
+          <div>
+            <label for="phone">Số điện thoại</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="0912345678"
+              maxlength="10"
+              pattern="^0[0-9]{9}$"
+              required
+            >
+            <span class="field-hint">Gồm đúng 10 chữ số (VD: 0912345678)</span>
+          </div>
+
+          <div>
+            <label for="password">Mật khẩu</label>
+            <div class="input-password-wrap">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Tối thiểu 6 ký tự"
+                minlength="6"
+                autocomplete="new-password"
+                required
+              >
+              <button type="button" class="btn-toggle-pass" id="toggle-password">Hiện</button>
+            </div>
+          </div>
+
+          <div>
+            <label for="confirm_password">Xác nhận mật khẩu</label>
+            <input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              placeholder="Nhập lại mật khẩu"
+              autocomplete="new-password"
+              required
+            >
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btn-submit" class="btn btn-primary btn-block">
+              Đăng ký tài khoản
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-footer">
+          Đã có tài khoản? <a href="login.html"><strong>Đăng nhập</strong></a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/pages/register.js"></script>
+</body>
+</html>
