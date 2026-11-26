@@ -30,8 +30,8 @@
   <div class="flex-1 flex flex-col min-w-0">
     <header
       id="admin-topbar"
-      data-title="Lập lịch & Điều phối chuyến xe"
-      data-action-html='<button id="btn-new-trip" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-xs transition"><span class="material-symbols-outlined text-[19px]">add</span>Mở chuyến mới</button>'
+      data-title="Quản lý tuyến đường & Bến xe"
+      data-action-html='<div class="flex items-center gap-2"><button type="button" id="btn-new-station" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold transition"><span class="material-symbols-outlined text-[19px]">location_on</span>Thêm bến xe</button><button type="button" id="btn-new-route" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-xs transition"><span class="material-symbols-outlined text-[19px]">add</span>Thêm tuyến mới</button></div>'
     ></header>
 
     <main class="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-5">
@@ -160,7 +160,7 @@
         </div>
         <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
           <button type="button" id="btn-cancel-station" class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm font-medium text-slate-700">Hủy</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition">Lưu bến xe</button>
+          <button type="submit" id="btn-save-station" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition">Lưu bến xe</button>
         </div>
       </form>
     </div>
